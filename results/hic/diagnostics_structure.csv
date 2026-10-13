@@ -1,0 +1,4 @@
+variant,nodes_total,nodes_embedded,isolated,edges,components,largest_component,deg_min,deg_median,deg_mean,deg_p95,deg_max
+hic_cis,20263,20165,98,135400,39,1490,1,12.0,13.43,23.0,92
+hic_cis_trans,20263,20256,7,195476,1,20256,3,16.0,19.3,36.0,367
+linear_distance,20263,20232,31,119312,111,567,1,11.0,11.79,16.0,20

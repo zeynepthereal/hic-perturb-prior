@@ -1,0 +1,66 @@
+{
+  "graph_cfg": {
+    "cis_res": 25000,
+    "trans_res": 500000,
+    "max_fetch_dist": 10000000,
+    "max_edge_dist": 5000000,
+    "min_raw": 3,
+    "k_cis": 10,
+    "k_trans": 3,
+    "clip_q": 0.999,
+    "ice_iters": 200,
+    "ice_tol": 1e-05,
+    "seed": 0
+  },
+  "n_nodes_total": 20263,
+  "d0": 2020504.0,
+  "cis_clip": 22.526150118786525,
+  "trans_OE": null,
+  "hic_cis": {
+    "nodes_embedded": 20165,
+    "isolated_nodes": 98,
+    "edges": 135400,
+    "n_components": 39,
+    "largest_component": 1490,
+    "median_degree": 12.0,
+    "mean_degree": 13.4292090255393,
+    "max_degree": 92,
+    "median_weight": 1.8246668324098785,
+    "n_zero_eigenvalues_dropped": 39
+  },
+  "hic_cis_trans": {
+    "nodes_embedded": 20256,
+    "isolated_nodes": 7,
+    "edges": 195476,
+    "n_components": 1,
+    "largest_component": 20256,
+    "median_degree": 16.0,
+    "mean_degree": 19.30055292259084,
+    "max_degree": 367,
+    "median_weight": 2.2199884326475208,
+    "n_zero_eigenvalues_dropped": 1
+  },
+  "linear_distance": {
+    "nodes_embedded": 20232,
+    "isolated_nodes": 31,
+    "edges": 119312,
+    "n_components": 111,
+    "largest_component": 567,
+    "median_degree": 11.0,
+    "mean_degree": 11.794385132463423,
+    "max_degree": 20,
+    "median_weight": 0.908917746262961,
+    "n_zero_eigenvalues_dropped": 111
+  },
+  "hic_cis_vs_linear_distance": {
+    "edges_hic_cis": 135400,
+    "edges_linear": 119312,
+    "edges_shared": 30888,
+    "jaccard": 0.13800128672528414,
+    "frac_hic_cis_edges_also_in_linear": 0.22812407680945346,
+    "spearman_OE_vs_neg_distance_all_candidate_pairs": 0.06363535477075892,
+    "spearman_OE_vs_neg_distance_kept_edges": -0.1268602605040259,
+    "n_candidate_pairs": 1059092,
+    "spearman_weights_on_shared_edges": 0.016064286600997738
+  }
+}

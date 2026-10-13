@@ -31,7 +31,8 @@ def test_spectral_handles_components_and_isolated_nodes():
     W = sp.csr_matrix((np.ones(len(a)), (a, b)), shape=(63, 63)); W = W + W.T
     r = spectral_embedding(W, k_max=6)
     assert r["n_components"] == 2 and r["n_isolated"] == 3
-    assert np.all(r["trivial_eigvals"] < 1e-6) and r["eigvals"][0] > 1e-6          # trivial vectors dropped
+    assert r["eigvals"][0] > 1e-6 and np.allclose(r["eigvals"][0], r["eigvals"][1])   # trivial modes dropped; ring eigenvalue is doubly degenerate across the 2 rings
+    assert np.allclose(r["eigvals"][0], 1 - np.cos(2 * np.pi / 30), atol=1e-8)
     assert np.isnan(r["emb"][60:]).all() and not np.isnan(r["emb"][:60]).any()   # isolated nodes unembedded
     assert np.allclose(np.sqrt((r["emb"][:60] ** 2).mean(0)), 1)
 

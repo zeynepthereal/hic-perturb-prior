@@ -1,0 +1,8 @@
+variant,dims,R2_chromosome,R2_chrom+linear_pos,R2_chrom+poly3_pos
+hic_cis,first 10,0.005,0.577,0.814
+hic_cis,first 50,0.004,0.24,0.63
+hic_cis_trans,first 10,0.222,0.361,0.507
+hic_cis_trans,first 50,0.114,0.192,0.321
+linear_distance,first 10,0.0,0.232,0.617
+linear_distance,first 50,0.0,0.088,0.35
+random_gaussian (reference),first 10,0.001,0.002,0.005

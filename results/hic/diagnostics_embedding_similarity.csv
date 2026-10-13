@@ -1,0 +1,4 @@
+pair,n_common_nodes,mean_canonical_corr_10d,top3_canonical,min_canonical
+hic_cis vs linear_distance,20165,0.295,"[0.968, 0.704, 0.656]",0.0
+hic_cis_trans vs linear_distance,20230,0.112,"[0.301, 0.277, 0.215]",0.004
+hic_cis_trans vs hic_cis,20165,0.141,"[0.422, 0.298, 0.268]",0.001

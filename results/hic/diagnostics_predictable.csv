@@ -1,0 +1,7 @@
+scope,train_pca_expr,hic_cis,hic_cis_trans,linear_distance,common_pca_and_hic_cis_trans
+all 1092 perturbations,412,1092,1092,1092,412
+test split gears_seed1 (n=273),104,273,273,273,104
+test split gears_seed2 (n=273),105,273,273,273,105
+test split gears_seed3 (n=273),105,273,273,273,105
+test split gears_seed4 (n=273),100,273,273,273,100
+test split gears_seed5 (n=273),103,273,273,273,103

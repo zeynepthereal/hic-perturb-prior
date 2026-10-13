@@ -58,6 +58,24 @@ Paper (Replogle K562, top-1000 expressed genes, target included): mean L2 4.119 
 - `top1000_expr` uses control cells only; `top20_de` uses the observed test delta by design (oracle subset, evaluation only, never fed to a model).
 - Hyper-parameters are chosen on val perturbations only. The "paper" column uses fixed K=10, lambda=0.1.
 
+## Week 2 part 1: Hi-C gene graphs (no perturbation model run with them yet)
+Pipeline: `scripts/build_gene_table.py` -> `scripts/fetch_hic.py cis|trans` -> `scripts/build_graphs.py` -> `scripts/diagnose_hic.py`
+(code in `src/hic/`; outputs `results/hic/` incl. `diagnostics.md`, `mapping_report.txt`, `graph_stats.json`, `figs/`; heavy artifacts in gitignored `data/hic/`).
+- **Hi-C**: ENCODE `ENCFF616PUW` (experiment ENCSR545YBD, K562 in situ Hi-C of Rao et al. 2014, **GRCh38**, 4 replicates merged, MAPQ-thresholded),
+  22.64 GB, ENCODE md5 `d4b999471d4c17a74f1e66370c0012e3`. **Read remotely** with hicstraw (HTTP range requests); the file was not downloaded
+  (checksum therefore not verifiable locally; ~0.9 GB total network traffic for all reads). Raw counts are fetched; balancing is our own ICE (the file has no KR vectors; VC/SCALE exist).
+  Other candidates (not used): GRCh38 ENCFF080DPJ 20.7 GB / ENCFF662ZGL 22.5 GB / ENCFF539KNF 24.3 GB; hg19 per-replicate files 2.3-4.5 GB (ENCFF013TGD etc.).
+- **Annotation**: GENCODE v44 primary assembly basic (GRCh38), MD5 `fc4731226d2d315e6b2415fd1690403d`; TSS = 5' end of the gene; chr1-22,X only (K562 is female; no chrY/chrM signal).
+- **Nodes**: 19,970 protein-coding genes + 293 extra GEARS genes = 20,263. GEARS genes: 4,986/5,000 read-outs map (14 fail: 10 chrM, 4 unplaced contigs), 1,092/1,092 targets map.
+- **Graph parameters** (`src/hic/graphs.py: GRAPH_CFG`): cis 25 kb, ICE, O/E by per-diagonal mean, edges within 5 Mb with >= 3 raw reads; trans 500 kb genome-wide ICE, O/E by chromosome-pair mean;
+  kNN rule identical for all variants: every node keeps k_cis=10 strongest cis edges (+ k_trans=3 trans partner bins for `hic_cis_trans`, one random gene per partner bin), union-symmetrized, weights clipped at the 99.9th percentile.
+  `linear_distance`: same per-node degree as the hic_cis directed selection, nearest genes by TSS distance, weight exp(-d/d0).
+- **Spectral**: normalized Laplacian, each connected component decomposed separately and its trivial zero mode dropped (ARPACK cannot resolve the degenerate zero eigenspace: it returned 3 of 39),
+  first 50 non-trivial eigenvectors saved, columns scaled to unit RMS. Isolated nodes get no embedding.
+- **Embeddings** (`src/hic/embeddings.py`, names usable in `eval.embeddings`): `hic_cis`, `hic_cis_trans`, `linear_distance`, plus nulls `<variant>:perm:<seed>` (gene-label permutation),
+  `hic_cis_trans:rewire:<seed>` (degree-preserving rewire, built lazily), `<variant>:random:<seed>` (Gaussian, matched dims). G stays the training-data PCA; only P changes.
+- **Diagnostics summary** (full tables in `results/hic/diagnostics.md`): see below in the project notes / PR description.
+
 ## Primary config and caveats
 `configs/k562_gears.yaml` is the primary benchmark (directly comparable to the literature). Caveats to carry into every comparison:
 (1) absolute L2 is ~4-6% above the paper's (Pearson and linear/mean ratios match); (2) the paper's own train/test splits are not recoverable
