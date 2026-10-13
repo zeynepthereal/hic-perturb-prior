@@ -1,4 +1,4 @@
-name: k562_repro_5000hvg
+name: k562_scperturb_5000hvg
 data:
   raw_path: data/raw/ReplogleWeissman2022_K562_essential.h5ad
   processed_path: data/processed/k562_essential_hvg5000.npz
@@ -21,7 +21,11 @@ eval:
   - 0.1
   - 0.2
   split_files: {}
-  embedding: train_pca_expr
+  extra_eval_sets:
+    gears_pertset: configs/gears_k562_perturbations.csv
+  embeddings:
+  - train_pca_expr
+  refit_trainval: true
   paper_K: 10
   paper_lambda: 0.1
   K_grid:

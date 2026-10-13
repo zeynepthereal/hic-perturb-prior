@@ -1,0 +1,47 @@
+[
+  {
+    "split": "gears_seed1",
+    "n_train": 737,
+    "n_val": 82,
+    "n_test": 273,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 104
+  },
+  {
+    "split": "gears_seed2",
+    "n_train": 737,
+    "n_val": 82,
+    "n_test": 273,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 105
+  },
+  {
+    "split": "gears_seed3",
+    "n_train": 737,
+    "n_val": 82,
+    "n_test": 273,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 105
+  },
+  {
+    "split": "gears_seed4",
+    "n_train": 737,
+    "n_val": 82,
+    "n_test": 273,
+    "train_pca_expr_K": 2,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 100
+  },
+  {
+    "split": "gears_seed5",
+    "n_train": 737,
+    "n_val": 82,
+    "n_test": 273,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 103
+  }
+]
