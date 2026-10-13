@@ -1,0 +1,8 @@
+readout: 5000 queried | mapped 4986 (by id 4979, by symbol 3, by h5ad coords 4) | failed 14
+    fail: chrM_no_hic: 10  e.g. MT-ND1, MT-ND2, MT-CO1, MT-ATP8, MT-ATP6, MT-CO3, MT-ND3, MT-ND4L
+    fail: non_standard_contig: 4  e.g. BX004987.1, MAFIP, AL354822.1, AC240274.1
+target: 1092 queried | mapped 1092 (by id 1092, by symbol 0, by h5ad coords 0) | failed 0
+targets also present as read-outs: 412; targets NOT read-outs: 680 (mapped 680)
+id_changes: symbol of Ensembl ID differs between dataset and GENCODE v44: 237
+nodes: 20263 (protein-coding 19970, extra dataset genes 293), readouts on graph 4986, targets on graph 1092
+genes sharing a 25 kb TSS bin with another node: 7753; sharing a 500 kb bin: 19238
