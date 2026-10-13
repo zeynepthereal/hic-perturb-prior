@@ -36,7 +36,7 @@ def git_state() -> dict:
     """Commit hash + dirty flag ('NO_COMMITS' if the repo has no commit yet)."""
     return {
         "commit": _git("rev-parse", "HEAD") or "NO_COMMITS",
-        "dirty": bool(_git("status", "--porcelain")),
+        "dirty": bool(_git("status", "--porcelain", "--", ".", ":!results")),  # code changes only; outputs ignored
     }
 
 

@@ -6,3 +6,4 @@ dependencies:
   - pip
   - pip:
       - cell-gears==0.1.2
+      - torch_geometric

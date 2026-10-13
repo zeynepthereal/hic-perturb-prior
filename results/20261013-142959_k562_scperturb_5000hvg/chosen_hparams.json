@@ -1,0 +1,47 @@
+[
+  {
+    "split": "seed0",
+    "n_train": 1440,
+    "n_val": 206,
+    "n_test": 411,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 165
+  },
+  {
+    "split": "seed1",
+    "n_train": 1440,
+    "n_val": 206,
+    "n_test": 411,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 153
+  },
+  {
+    "split": "seed2",
+    "n_train": 1440,
+    "n_val": 206,
+    "n_test": 411,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 156
+  },
+  {
+    "split": "seed3",
+    "n_train": 1440,
+    "n_val": 206,
+    "n_test": 411,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 166
+  },
+  {
+    "split": "seed4",
+    "n_train": 1440,
+    "n_val": 206,
+    "n_test": 411,
+    "train_pca_expr_K": 20,
+    "train_pca_expr_lambda": 10.0,
+    "n_eval_common": 153
+  }
+]
