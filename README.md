@@ -74,7 +74,14 @@ Pipeline: `scripts/build_gene_table.py` -> `scripts/fetch_hic.py cis|trans` -> `
   first 50 non-trivial eigenvectors saved, columns scaled to unit RMS. Isolated nodes get no embedding.
 - **Embeddings** (`src/hic/embeddings.py`, names usable in `eval.embeddings`): `hic_cis`, `hic_cis_trans`, `linear_distance`, plus nulls `<variant>:perm:<seed>` (gene-label permutation),
   `hic_cis_trans:rewire:<seed>` (degree-preserving rewire, built lazily), `<variant>:random:<seed>` (Gaussian, matched dims). G stays the training-data PCA; only P changes.
-- **Diagnostics summary** (full tables in `results/hic/diagnostics.md`): see below in the project notes / PR description.
+- **Diagnostics summary** (full tables in `results/hic/diagnostics.md`):
+  - components / isolated nodes / edges: hic_cis 39 / 98 / 135k; hic_cis_trans 1 / 7 / 195k; linear_distance 111 / 31 / 119k. Median degree 12 / 16 / 11.
+  - R² of the first 10 embedding dims explained by chromosome + per-chromosome cubic position: hic_cis 0.81, hic_cis_trans 0.51, linear_distance 0.62 (random reference 0.005);
+    chromosome alone: 0.005 / 0.22 / 0.00. **Flag: all three exceed 0.5; the cis-only Hi-C embedding is more positional than the linear-distance control.**
+    Only hic_cis_trans has a substantial non-positional component (first 50 dims: 0.32 explained).
+  - cis-only graphs have tiny Laplacian eigenvalues (1e-4..5e-3, near-degenerate, localized on components) so their dimensions are unstable; hic_cis_trans eigenvalues 0.016..0.22.
+  - hic_cis vs linear_distance edges: Jaccard 0.14 (23% of hic_cis edges also in the control); Spearman(O/E, -distance) = 0.06 over all 1.06M candidate pairs (decay removed), 0.016 on shared edge weights.
+  - predictable GEARS perturbations: PCA 412/1092 (about 103/273 per test split); every Hi-C variant 1092/1092 (273/273 per split) -> extended eval sets ~2.6x larger.
 
 ## Primary config and caveats
 `configs/k562_gears.yaml` is the primary benchmark (directly comparable to the literature). Caveats to carry into every comparison:
