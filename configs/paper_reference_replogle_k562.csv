@@ -1,0 +1,10 @@
+,,l2,l2,r2_delta,r2_delta
+,,mean,std,mean,std
+dataset_name,method,,,,
+replogle_k562_essential,gears,3.991,0.029,0.387,0.019
+replogle_k562_essential,geneformer,4.162,0.004,0.397,0.008
+replogle_k562_essential,lpm_selftrained,3.996,0.091,0.433,0.017
+replogle_k562_essential,mean,4.119,0.026,0.404,0.009
+replogle_k562_essential,scbert,4.117,0.025,0.404,0.009
+replogle_k562_essential,scgpt,4.334,0.151,0.317,0.038
+replogle_k562_essential,uce,4.126,0.032,0.406,0.011

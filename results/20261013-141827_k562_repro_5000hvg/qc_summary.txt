@@ -1,0 +1,11 @@
+perturbations: 2057
+  <25 cells: 54   (<10: 8, <50: 225)
+  target gene not in 8563-gene matrix: 191
+  target in matrix but not in HVG read-out set (cannot be predicted by G-rows P): 1069
+  target in read-out set (evaluable): 797
+knockdown (log2FC of mean normalised target expr vs control; 1866 targets in matrix):
+  no knockdown (log2FC >= -0.1, <~7% reduction): 9
+  weak (-0.58 < log2FC < -0.1, 7-33% reduction): 53
+  >=33% reduction (log2FC <= -0.58): 1804
+  median reduction among targets: 82%
+  low-expressed targets (ctrl mean norm < 0.5, knockdown poorly measurable): 719

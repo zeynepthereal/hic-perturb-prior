@@ -1,0 +1,40 @@
+name: k562_repro_5000hvg
+data:
+  raw_path: data/raw/ReplogleWeissman2022_K562_essential.h5ad
+  processed_path: data/processed/k562_essential_hvg5000.npz
+  qc_path: results/qc_perturbations.csv
+  pert_col: perturbation
+  control_label: control
+  target_sum: 10000
+  n_hvg: 5000
+  min_cells: 1
+  chunk: 20000
+eval:
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  split_fracs:
+  - 0.7
+  - 0.1
+  - 0.2
+  split_files: {}
+  embedding: train_pca_expr
+  paper_K: 10
+  paper_lambda: 0.1
+  K_grid:
+  - 2
+  - 5
+  - 10
+  - 20
+  - 50
+  lambda_grid:
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  n_top_de: 20
+  n_top_expr: 1000
+  exclude_target_primary: true

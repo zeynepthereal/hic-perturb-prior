@@ -1,0 +1,16 @@
+name: hic-perturb-prior
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - scanpy
+  - anndata
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - pyyaml
+  - pytest
+  - tabulate
+  - openpyxl

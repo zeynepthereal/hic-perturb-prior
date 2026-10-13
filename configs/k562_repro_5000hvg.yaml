@@ -1,0 +1,24 @@
+# PRIMARY: reproduction of Ahlmann-Eltze et al. 2025 linear baseline (K=10, lambda=0.1, 5000 genes).
+name: k562_repro_5000hvg
+data:
+  raw_path: data/raw/ReplogleWeissman2022_K562_essential.h5ad
+  processed_path: data/processed/k562_essential_hvg5000.npz
+  qc_path: results/qc_perturbations.csv
+  pert_col: perturbation
+  control_label: control
+  target_sum: 10000
+  n_hvg: 5000          # paper/GEARS: 5000 genes. HVG selection here: scanpy-seurat replica on all cells.
+  min_cells: 1         # NO quality filtering yet (QC is only logged)
+  chunk: 20000
+eval:
+  seeds: [0, 1, 2, 3, 4]
+  split_fracs: [0.7, 0.1, 0.2]   # train / val / test over perturbations
+  split_files: {}                # e.g. {gears_seed1: path/to/set2conditions.json} once available
+  embedding: train_pca_expr      # PCA on training expression pseudobulks, as in the paper's code
+  paper_K: 10
+  paper_lambda: 0.1
+  K_grid: [2, 5, 10, 20, 50]
+  lambda_grid: [0.01, 0.1, 1.0, 10.0]
+  n_top_de: 20
+  n_top_expr: 1000               # paper's headline metric: 1000 most expressed genes in control
+  exclude_target_primary: true   # primary tables exclude each perturbation's own target gene; "included" always also reported
