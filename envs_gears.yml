@@ -1,0 +1,8 @@
+name: hic-perturb-gears
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - cell-gears==0.1.2

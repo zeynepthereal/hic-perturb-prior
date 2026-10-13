@@ -145,12 +145,6 @@ def make_split(n: int, seed: int, fracs=(0.7, 0.1, 0.2)) -> dict[str, np.ndarray
     return {"train": np.sort(perm[:n_tr]), "val": np.sort(perm[n_tr:n_tr + n_va]), "test": np.sort(perm[n_tr + n_va:])}
 
 
-def predictable_subset(ds: PerturbationDataset, require_target_in_readout: bool = True) -> PerturbationDataset:
-    """Linear model with P = rows of G can only handle perturbations whose target is a read-out gene
-    (same restriction as the paper). Apply to ALL methods so they are evaluated on the same perturbations."""
-    return ds.subset(np.where(ds.target_idx >= 0)[0]) if require_target_in_readout else ds
-
-
 def split_from_conditions(ds: PerturbationDataset, set2conditions: dict) -> dict[str, np.ndarray]:
     """Map GEARS-style {'train': [...], 'val': [...], 'test': [...]} (conditions like 'GENE+ctrl') onto ds rows.
     Conditions not present in ds (e.g. dropped by our filters) are skipped and counted in ds.meta by the caller."""
@@ -160,3 +154,44 @@ def split_from_conditions(ds: PerturbationDataset, set2conditions: dict) -> dict
         names = [c.replace("+ctrl", "").replace("ctrl+", "") for c in conds if c != "ctrl"]
         out[k] = np.array(sorted(pos[n] for n in names if n in pos), dtype=int)
     return out
+
+
+def preprocess_gears(h5ad_path: str | Path, cfg: dict):
+    """GEARS' own processed Replogle K562 (perturb_processed.h5ad: already normalised+log1p, 5000 genes).
+    Same recipe as the paper's R code: pseudobulk MEAN of assay X per condition; change = pseudobulk - mean of ctrl cells.
+    Returns (PerturbationDataset, QC DataFrame) with the same fields as `preprocess`."""
+    import anndata as ad
+    import scipy.sparse as sp
+
+    d = cfg["data"]
+    a = ad.read_h5ad(h5ad_path)
+    cond = a.obs[d["pert_col"]].astype(str).values
+    ctrl = cond == d["control_label"]
+    genes = (a.var["gene_name"].astype(str).values if "gene_name" in a.var else a.var_names.values.astype(str))
+    X = sp.csr_matrix(a.X)
+    names = np.array(sorted(set(cond[~ctrl])))
+    singles = np.array(["+" not in c.replace("+ctrl", "") and c.endswith("+ctrl") for c in names])
+    names = names[singles]
+    idx = {c: i for i, c in enumerate(names)}
+    keep_cell = np.array([c in idx for c in cond])
+    rows = np.where(keep_cell)[0]
+    inv = np.array([idx[c] for c in cond[rows]])
+    cnt = np.bincount(inv, minlength=len(names)).astype(float)
+    M = sp.csr_matrix((1.0 / cnt[inv], (inv, rows)), shape=(len(names), a.n_obs))
+    pb = np.asarray((M @ X).todense())
+    ctrl_mean = np.asarray(X[np.where(ctrl)[0]].mean(axis=0)).ravel()
+    perts = np.array([c.replace("+ctrl", "") for c in names])
+    pos = {g: i for i, g in enumerate(genes)}
+    target_idx = np.array([pos.get(p, -1) for p in perts])
+    delta = pb - ctrl_mean
+    qc = pd.DataFrame({"perturbation": perts, "n_cells": cnt.astype(int), "target_in_matrix": target_idx >= 0,
+                       "target_in_readout": target_idx >= 0,
+                       "target_ctrl_mean_norm": [ctrl_mean[t] if t >= 0 else np.nan for t in target_idx],
+                       "target_log2fc": np.nan,  # GEARS file has no counts -> only the log1p-scale difference
+                       "target_log1p_diff": [delta[i, t] if t >= 0 else np.nan for i, t in enumerate(target_idx)]})
+    sample = X[:2000].toarray()
+    meta = {"source_file": str(h5ad_path), "source_md5": md5(h5ad_path), "source": "GEARS perturb_processed.h5ad",
+            "n_genes": int(a.n_vars), "n_control_cells": int(ctrl.sum()), "n_perts_total": int(len(perts)),
+            "n_perts_target_in_readout": int((target_idx >= 0).sum()),
+            "X_integer_valued": bool(np.allclose(sample, np.round(sample))), "X_max": float(sample.max())}
+    return PerturbationDataset(delta, genes, perts, target_idx, cnt.astype(int), ctrl_mean, meta), qc

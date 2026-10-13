@@ -7,13 +7,15 @@ import json
 import numpy as np
 import pandas as pd
 
-from .data import PerturbationDataset, predictable_subset, preprocess
+from .data import PerturbationDataset, preprocess, preprocess_gears
 from .evaluate import format_table, get_splits, run_split, summarize
 from .utils import REPO_ROOT, load_config, make_run_dir
 
 
 def qc_summary(qc: pd.DataFrame) -> str:
-    t = qc[qc.target_in_matrix]
+    t = qc[qc.target_in_matrix].copy()
+    if t.target_log2fc.isna().all():   # GEARS file: no counts, only the log1p-scale difference (approx. log_e FC)
+        t["target_log2fc"] = t.target_log1p_diff / np.log(2)
     pct = 100 * (1 - 2 ** t.target_log2fc)
     lines = [f"perturbations: {len(qc)}",
              f"  <25 cells: {(qc.n_cells < 25).sum()}   (<10: {(qc.n_cells < 10).sum()}, <50: {(qc.n_cells < 50).sum()})",
@@ -39,13 +41,13 @@ def main():
     d = cfg["data"]
     proc, qc_path = REPO_ROOT / d["processed_path"], REPO_ROOT / d["qc_path"]
     if a.preprocess or not proc.exists():
-        ds, qc = preprocess(REPO_ROOT / d["raw_path"], cfg)
+        ds, qc = (preprocess_gears if d.get("source") == "gears" else preprocess)(REPO_ROOT / d["raw_path"], cfg)
         ds.save(proc)
         qc_path.parent.mkdir(parents=True, exist_ok=True)
         qc.to_csv(qc_path, index=False)
     ds_all = PerturbationDataset.load(proc)
     qc = pd.read_csv(qc_path)
-    ds = predictable_subset(ds_all)
+    ds = ds_all
 
     run_dir = make_run_dir(cfg, cfg["name"])
     qc.to_csv(run_dir / "qc_perturbations.csv", index=False)
@@ -65,7 +67,10 @@ def main():
     (run_dir / "dataset_meta.json").write_text(json.dumps({**ds.meta, "n_perts_evaluated": len(ds.perts)}, indent=2))
     primary = "excluded" if cfg["eval"]["exclude_target_primary"] else "included"
     other = "included" if primary == "excluded" else "excluded"
-    md = f"## target gene {primary} (primary)\n\n{format_table(summ, primary)}\n\n## target gene {other}\n\n{format_table(summ, other)}\n"
+    md = ""
+    for es in summ.eval_set.unique():
+        for tm in (primary, other):
+            md += f"{format_table(summ, es, tm)}\n\n"
     (run_dir / "summary.md").write_text(md)
     print(md, "\n->", run_dir)
 

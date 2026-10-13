@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .evaluate import PAPER_LM, TUNED_LM
+from .evaluate import lm_name
 from .utils import REPO_ROOT
 
 
@@ -34,17 +34,22 @@ def main(run_dir: str):
         rows.append((k, f(r.l2_mean, r.l2_std), f(r.pearson_mean, r.pearson_std)))
     ref_ratio = (paper.loc["lpm_selftrained"].l2_mean / paper.loc["mean"].l2_mean,
                  paper.loc["lpm_selftrained"].pearson_mean / paper.loc["mean"].pearson_mean)
+    emb = [m for m in ours.model.unique() if m.startswith("linear[")][0].split("]")[0][len("linear["):]
+    PAPER_LM, TUNED_LM = lm_name(emb, False), lm_name(emb, True)
     out = ["# Comparison with Ahlmann-Eltze et al. 2025 (Replogle K562)\n",
-           "Paper rows: top-1000-expressed-genes L2 and Pearson delta, mean ± sd over 2 splits (GEARS-processed data, 5000 genes).",
-           "Our rows: same metric definitions on our preprocessing, mean ± sd over our splits.\n"]
-    for target in ("included", "excluded"):
-        t = ours[(ours.target == target) & (ours.subset == "top1000_expr")].set_index("model")
+           "Paper rows: top-1000-expressed-genes L2 and Pearson delta, mean ± sd over their 2 splits (GEARS-processed data).",
+           "Our rows: same metric definitions, mean ± sd over our splits. Every table states its eval_set and size.\n"]
+    for es in [e for e in ("common", "paper_pertset") if e in set(ours.eval_set)]:
+      for target in ("included", "excluded"):
+        t = ours[(ours.eval_set == es) & (ours.target == target) & (ours.subset == "top1000_expr")].set_index("model")
+        n, k = t.n_perts.mean(), t.n_splits.max()
         tbl = list(rows)
         for m in ("no_change", "mean", PAPER_LM, TUNED_LM):
             r = t.loc[m]
             tbl.append((f"ours: {m}", f(r.l2_mean, r.l2_std), f(r.pearson_mean, r.pearson_std)))
         df = pd.DataFrame(tbl, columns=["", "L2 (top1000 expr)", "Pearson delta (top1000 expr)"]).set_index("")
-        out.append(f"## target gene {target}" + (" (like-for-like with the paper)" if target == "included" else "") + "\n")
+        out.append(f"## eval_set = {es}, target gene {target}" + (" (like-for-like with the paper)" if target == "included" else "")
+                   + f"\n\n{n:.0f} test perturbations per split, {k} splits.\n")
         out.append(df.to_markdown() + "\n")
         rt = []
         for m in (PAPER_LM, TUNED_LM):

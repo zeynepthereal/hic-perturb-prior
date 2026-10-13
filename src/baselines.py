@@ -1,12 +1,15 @@
 """Baselines. Convention everywhere: Y is (n_pert, n_gene) deltas (perturbation minus control).
 
-An *embedding function* maps (Y_train, train_idx, ds, K) -> (G, P_all):
+An `Embedding` (see below) maps (Y_train, train_idx, ds, K) -> (G, P_all):
     G      (n_gene, K)  gene embedding
     P_all  (n_pert, L)  perturbation embedding for ALL perturbations (train and unseen)
 Swap `P_all` (GO spectral, Hi-C spectral, shuffled Hi-C, random) by registering a new function in EMBEDDINGS;
 LinearModel and evaluation code stay unchanged.
 """
 from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Callable
 
 import numpy as np
 
@@ -48,15 +51,29 @@ def pca_gene_embedding(Y_train, K):
     return U[:, :K] * S[:K]
 
 
+@dataclass
+class Embedding:
+    """A (G, P) provider. `fit` -> (G (n_gene, K), P_all (n_pert, L)) with NaN rows for perturbations it cannot embed;
+    `predictable(ds)` -> bool (n_pert,) saying which perturbations it can embed (independent of the split).
+    Register new ones (GO spectral, Hi-C spectral, shuffled Hi-C, random) in EMBEDDINGS."""
+    fit: Callable
+    predictable: Callable
+
+
 def _train_pca_rows(Y_train, ds, K, on_expression):
     # Paper (run_linear_pretrained_model.R): prcomp on the training *expression* pseudobulks, not on deltas.
     X = Y_train + ds.ctrl_mean if on_expression else Y_train
     G = pca_gene_embedding(X, K)          # fit on training perturbations ONLY (caller passes Y_train)
-    return G, G[ds.target_idx]            # P = rows of G at the perturbed genes (all perts, incl. unseen)
+    P = np.full((len(ds.perts), K), np.nan)
+    ok = ds.target_idx >= 0
+    P[ok] = G[ds.target_idx[ok]]          # P = rows of G at the perturbed genes
+    return G, P
 
 
-def train_pca_expr_rows(Y_train, train_idx, ds, K): return _train_pca_rows(Y_train, ds, K, True)
-def train_pca_delta_rows(Y_train, train_idx, ds, K): return _train_pca_rows(Y_train, ds, K, False)
+def _pca_ok(ds): return ds.target_idx >= 0
 
 
-EMBEDDINGS = {"train_pca_expr": train_pca_expr_rows, "train_pca_delta": train_pca_delta_rows}
+EMBEDDINGS = {
+    "train_pca_expr": Embedding(lambda Y, tr, ds, K: _train_pca_rows(Y, ds, K, True), _pca_ok),
+    "train_pca_delta": Embedding(lambda Y, tr, ds, K: _train_pca_rows(Y, ds, K, False), _pca_ok),
+}

@@ -8,10 +8,12 @@ import pandas as pd
 
 from .baselines import EMBEDDINGS, LinearModel, MeanBaseline, NoChange
 from .data import PerturbationDataset, make_split, split_from_conditions
-from .utils import set_seed
+from .utils import REPO_ROOT, set_seed
 
-PAPER_LM = "linear (paper K=10, lam=0.1)"
-TUNED_LM = "linear (val-tuned)"
+
+
+def lm_name(emb: str, tuned: bool) -> str:
+    return f"linear[{emb}] ({'val-tuned' if tuned else 'paper hp K=10, lam=0.1'})"
 
 
 def gene_masks(obs_delta, ctrl_mean, target_idx, exclude_target, n_de=20, n_expr=1000) -> dict:
@@ -53,73 +55,112 @@ def per_pert_metrics(pred, obs, masks: dict) -> pd.DataFrame:
 
 
 def fit_predict_linear(ds, train_idx, test_idx, K, lam, embedding):
-    Y = ds.delta[train_idx]
-    G, P_all = EMBEDDINGS[embedding](Y, train_idx, ds, K)
-    return LinearModel(lam).fit(Y, G, P_all[train_idx]).predict(P_all[test_idx])
+    """G is fit on ALL training perturbations (as in the paper's code); W and b only on those the embedding can embed.
+    Returns (len(test_idx), n_gene) with NaN rows for test perturbations the embedding cannot embed."""
+    emb = EMBEDDINGS[embedding]
+    G, P_all = emb.fit(ds.delta[train_idx], train_idx, ds, K)
+    ok = emb.predictable(ds)
+    tr = train_idx[ok[train_idx]]
+    m = LinearModel(lam).fit(ds.delta[tr], G, P_all[tr])
+    out = np.full((len(test_idx), ds.delta.shape[1]), np.nan)
+    t_ok = ok[test_idx]
+    out[t_ok] = m.predict(P_all[test_idx[t_ok]])
+    return out
 
 
 def select_hparams(ds, split, Ks, lams, embedding, exclude_target):
-    """Pick (K, lambda) minimising mean L2 over all read-out genes on the validation perturbations."""
-    obs = ds.delta[split["val"]]
-    allowed = gene_masks(obs, ds.ctrl_mean, ds.target_idx[split["val"]], exclude_target)["all"]
+    """Pick (K, lambda) minimising mean L2 (all read-out genes) on the validation perturbations the embedding can predict."""
+    va = split["val"][EMBEDDINGS[embedding].predictable(ds)[split["val"]]]
+    obs = ds.delta[va]
+    allowed = gene_masks(obs, ds.ctrl_mean, ds.target_idx[va], exclude_target)["all"]
     best, grid = None, []
     for K in Ks:
         for lam in lams:
-            pred = fit_predict_linear(ds, split["train"], split["val"], K, lam, embedding)
+            pred = fit_predict_linear(ds, split["train"], va, K, lam, embedding)
             err = float(np.sqrt((((pred - obs) ** 2) * allowed).sum(axis=1)).mean())
-            grid.append({"K": K, "lambda": lam, "val_l2": err})
+            grid.append({"embedding": embedding, "K": K, "lambda": lam, "val_l2": err, "n_val": len(va)})
             if best is None or err < best[0]:
                 best = (err, K, lam)
     return best[1], best[2], pd.DataFrame(grid)
 
 
 def run_split(ds: PerturbationDataset, cfg: dict, split: dict, label, seed: int):
+    """Fit all models on one train/val/test split and score them on the eval sets:
+      common            test perturbations predictable by ALL compared embeddings  (primary comparison)
+      extended:<emb>    all test perturbations predictable by <emb> (superset of common), <emb> vs mean baseline only
+      paper_pertset     (optional) common ∩ the perturbations the paper evaluated for this split
+    """
     set_seed(seed)
     e = cfg["eval"]
-    emb, excl = e["embedding"], e["exclude_target_primary"]
+    embs, excl = e["embeddings"], e["exclude_target_primary"]
     tr, va, te = split["train"], split["val"], split["test"]
-    K, lam, grid = select_hparams(ds, split, e["K_grid"], e["lambda_grid"], emb, excl)
-    trva = np.concatenate([tr, va])   # models are refit on train+val before scoring on test
+    fit_idx = np.concatenate([tr, va]) if e.get("refit_trainval", True) else tr
     obs = ds.delta[te]
-    preds = {
-        "no_change": NoChange().fit(ds.delta[trva]).predict(len(te)),
-        "mean": MeanBaseline().fit(ds.delta[trva]).predict(len(te)),
-        PAPER_LM: fit_predict_linear(ds, trva, te, e["paper_K"], e["paper_lambda"], emb),
-        TUNED_LM: fit_predict_linear(ds, trva, te, K, lam, emb),
-    }
+    preds = {"no_change": NoChange().fit(ds.delta[fit_idx]).predict(len(te)),
+             "mean": MeanBaseline().fit(ds.delta[fit_idx]).predict(len(te))}
+    ok, info, grids = {}, {"split": label, "n_train": len(tr), "n_val": len(va), "n_test": len(te)}, []
+    for emb in embs:
+        K, lam, grid = select_hparams(ds, split, e["K_grid"], e["lambda_grid"], emb, excl)
+        preds[lm_name(emb, False)] = fit_predict_linear(ds, fit_idx, te, e["paper_K"], e["paper_lambda"], emb)
+        preds[lm_name(emb, True)] = fit_predict_linear(ds, fit_idx, te, K, lam, emb)
+        ok[emb] = EMBEDDINGS[emb].predictable(ds)[te]
+        info[f"{emb}_K"], info[f"{emb}_lambda"] = K, lam
+        grids.append(grid)
+    common = np.logical_and.reduce([ok[m] for m in embs])
+    sets = {"common": (common, list(preds))}
+    for emb in embs:
+        if (ok[emb] != common).any():
+            sets[f"extended:{emb}"] = (ok[emb], ["mean", lm_name(emb, False), lm_name(emb, True)])
+    pf = e.get("paper_pert_file")
+    if pf:
+        pp = pd.read_csv(REPO_ROOT / pf)
+        names = set(pp.loc[pp.split == label, "perturbation"])
+        if names:
+            sets["paper_pertset"] = (common & np.isin(ds.perts[te], list(names)), list(preds))
     out = []
-    for target_mode, excl_flag in (("excluded", True), ("included", False)):
-        masks = gene_masks(obs, ds.ctrl_mean, ds.target_idx[te], excl_flag, e["n_top_de"], e["n_top_expr"])
-        for name, p in preds.items():
-            df = per_pert_metrics(p, obs, masks)
-            df["model"], df["split"], df["target"] = name, label, target_mode
-            out.append(df)
-    info = {"split": label, "K": K, "lambda": lam, "n_train": len(tr), "n_val": len(va), "n_test": len(te)}
-    return pd.concat(out), info, grid
+    for set_name, (sel, models) in sets.items():
+        info[f"n_eval_{set_name}"] = int(sel.sum())
+        if sel.sum() == 0:
+            continue
+        for target_mode, excl_flag in (("excluded", True), ("included", False)):
+            masks = gene_masks(obs[sel], ds.ctrl_mean, ds.target_idx[te][sel], excl_flag, e["n_top_de"], e["n_top_expr"])
+            for name in models:
+                df = per_pert_metrics(preds[name][sel], obs[sel], masks)
+                df["pert_i"] = te[sel][df["pert_i"].values]
+                df["model"], df["split"], df["target"], df["eval_set"] = name, label, target_mode, set_name
+                out.append(df)
+    return pd.concat(out), info, pd.concat(grids)
 
 
 def get_splits(ds, cfg):
-    """Yield (label, seed, split) for the random-seed runs and any GEARS/paper split files in the config."""
+    """Yield (label, seed, split) for random-seed runs plus any GEARS-style split files ({train,val,test: [conditions]})."""
     e = cfg["eval"]
-    for s in e["seeds"]:
+    for s in e.get("seeds") or []:
         yield f"seed{s}", s, make_split(len(ds.perts), s, tuple(e["split_fracs"]))
     for label, path in (e.get("split_files") or {}).items():
-        with open(path) as f:
-            yield label, 0, split_from_conditions(ds, json.load(f))
+        with open(REPO_ROOT / path) as f:
+            yield label, int(label.split("seed")[-1]) if "seed" in label else 0, split_from_conditions(ds, json.load(f))
 
 
-def summarize(per_pert: pd.DataFrame, group_col="split") -> pd.DataFrame:
-    """Mean over test perturbations within a split, then mean +- sd over splits."""
-    per_split = per_pert.groupby(["target", "model", "subset", group_col])[["l2", "pearson"]].mean().reset_index()
-    g = per_split.groupby(["target", "model", "subset"])[["l2", "pearson"]].agg(["mean", "std"])
-    g.columns = [f"{a}_{b}" for a, b in g.columns]
+KEYS = ["eval_set", "target", "model", "subset"]
+
+
+def summarize(per_pert: pd.DataFrame) -> pd.DataFrame:
+    """Mean over test perturbations within a split, then mean +- sd over splits; n_perts = mean #perts per split."""
+    per_split = per_pert.groupby(KEYS + ["split"]).agg(l2=("l2", "mean"), pearson=("pearson", "mean"),
+                                                       n=("pert_i", "nunique")).reset_index()
+    g = per_split.groupby(KEYS).agg(l2_mean=("l2", "mean"), l2_std=("l2", "std"), pearson_mean=("pearson", "mean"),
+                                    pearson_std=("pearson", "std"), n_perts=("n", "mean"), n_splits=("split", "nunique"))
     return g.reset_index()
 
 
-def format_table(summary: pd.DataFrame, target: str) -> str:
+def format_table(summary: pd.DataFrame, eval_set: str, target: str) -> str:
     def f(m, s): return "n/a" if np.isnan(m) else f"{m:.3f} ± {0 if np.isnan(s) else s:.3f}"
+    sub = summary[(summary.eval_set == eval_set) & (summary.target == target)]
     wide = {}
-    for _, r in summary[summary.target == target].iterrows():
+    for _, r in sub.iterrows():
         wide.setdefault(r["model"], {})[f"{r['subset']} L2"] = f(r["l2_mean"], r["l2_std"])
         wide[r["model"]][f"{r['subset']} Pearson"] = f(r["pearson_mean"], r["pearson_std"])
-    return pd.DataFrame(wide).T.to_markdown()
+    n, k = sub.n_perts.mean(), sub.n_splits.max()
+    title = f"**eval_set = {eval_set}**, target gene {target}; {n:.0f} test perturbations per split (mean over {k} splits)"
+    return title + "\n\n" + pd.DataFrame(wide).T.to_markdown()

@@ -50,3 +50,28 @@ def test_target_exclusion():
     assert inc["top20_de"][np.arange(10), tgt].all() and not exc["top20_de"][np.arange(10), tgt].any()
     assert (exc["top20_de"].sum(1) == 5).all() and (exc["top1000_expr"].sum(1) == 7).all()
     assert (exc["all"].sum(1) == 49).all()
+
+
+def _toy_ds(n_pert=120, n_gene=60, n_missing=30, seed=0):
+    from .data import PerturbationDataset
+    rng = np.random.RandomState(seed)
+    tgt = np.arange(n_pert) % n_gene
+    tgt[:n_missing] = -1                      # these perturbations' targets are not read-out genes
+    delta = rng.randn(n_pert, n_gene)
+    return PerturbationDataset(delta, np.array([f"g{i}" for i in range(n_gene)]), np.array([f"p{i}" for i in range(n_pert)]),
+                               tgt, np.full(n_pert, 100), rng.rand(n_gene), {})
+
+
+def test_unpredictable_perts_get_nan_and_eval_sets():
+    from .evaluate import fit_predict_linear, run_split
+    ds = _toy_ds()
+    idx = np.arange(120)
+    pred = fit_predict_linear(ds, idx[:80], idx[80:], 5, 0.1, "train_pca_expr")
+    ok = ds.target_idx[80:] >= 0
+    assert np.isnan(pred[~ok]).all() and not np.isnan(pred[ok]).any()
+    cfg = {"eval": {"embeddings": ["train_pca_expr"], "exclude_target_primary": True, "K_grid": [2, 5], "lambda_grid": [0.1],
+                    "paper_K": 5, "paper_lambda": 0.1, "n_top_de": 5, "n_top_expr": 10}}
+    split = {"train": idx[:80], "val": idx[80:100], "test": idx[100:]}
+    per, info, _ = run_split(ds, cfg, split, "s", 0)
+    assert set(per.eval_set) == {"common"} and info["n_eval_common"] == int((ds.target_idx[100:] >= 0).sum())
+    assert not per.l2.isna().any()
