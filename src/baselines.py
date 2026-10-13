@@ -8,9 +8,6 @@ LinearModel and evaluation code stay unchanged.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Callable
-
 import numpy as np
 
 
@@ -51,13 +48,19 @@ def pca_gene_embedding(Y_train, K):
     return U[:, :K] * S[:K]
 
 
-@dataclass
 class Embedding:
     """A (G, P) provider. `fit` -> (G (n_gene, K), P_all (n_pert, L)) with NaN rows for perturbations it cannot embed;
     `predictable(ds)` -> bool (n_pert,) saying which perturbations it can embed (independent of the split).
-    Register new ones (GO spectral, Hi-C spectral, shuffled Hi-C, random) in EMBEDDINGS."""
-    fit: Callable
-    predictable: Callable
+    Subclass (or register an instance in EMBEDDINGS) for new P: GO spectral, Hi-C spectral, shuffled Hi-C, random."""
+    def fit(self, Y_train, train_idx, ds, K): raise NotImplementedError
+    def predictable(self, ds): raise NotImplementedError
+
+
+class TrainPCAEmbedding(Embedding):
+    """Paper default: G = PCA of training data, P = rows of G at the perturbed genes (target must be a read-out gene)."""
+    def __init__(self, on_expression: bool): self.on_expression = on_expression
+    def fit(self, Y_train, train_idx, ds, K): return _train_pca_rows(Y_train, ds, K, self.on_expression)
+    def predictable(self, ds): return ds.target_idx >= 0
 
 
 def _train_pca_rows(Y_train, ds, K, on_expression):
@@ -70,10 +73,12 @@ def _train_pca_rows(Y_train, ds, K, on_expression):
     return G, P
 
 
-def _pca_ok(ds): return ds.target_idx >= 0
+class _Registry(dict):
+    """Known embeddings by name; graph-derived ones ('hic_cis', 'hic_cis_trans:perm:3', ...) are created on demand."""
+    def __missing__(self, name):
+        from .hic.embeddings import make_embedding
+        self[name] = make_embedding(name)
+        return self[name]
 
 
-EMBEDDINGS = {
-    "train_pca_expr": Embedding(lambda Y, tr, ds, K: _train_pca_rows(Y, ds, K, True), _pca_ok),
-    "train_pca_delta": Embedding(lambda Y, tr, ds, K: _train_pca_rows(Y, ds, K, False), _pca_ok),
-}
+EMBEDDINGS = _Registry({"train_pca_expr": TrainPCAEmbedding(True), "train_pca_delta": TrainPCAEmbedding(False)})
