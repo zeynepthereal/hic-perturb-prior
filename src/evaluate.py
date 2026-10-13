@@ -88,7 +88,7 @@ def run_split(ds: PerturbationDataset, cfg: dict, split: dict, label, seed: int)
     """Fit all models on one train/val/test split and score them on the eval sets:
       common            test perturbations predictable by ALL compared embeddings  (primary comparison)
       extended:<emb>    all test perturbations predictable by <emb> (superset of common), <emb> vs mean baseline only
-      paper_pertset     (optional) common ∩ the perturbations the paper evaluated for this split
+      <name>            (optional, eval.extra_eval_sets) common ∩ a named perturbation list, e.g. the perturbations kept by GEARS
     """
     set_seed(seed)
     e = cfg["eval"]
@@ -111,12 +111,9 @@ def run_split(ds: PerturbationDataset, cfg: dict, split: dict, label, seed: int)
     for emb in embs:
         if (ok[emb] != common).any():
             sets[f"extended:{emb}"] = (ok[emb], ["mean", lm_name(emb, False), lm_name(emb, True)])
-    pf = e.get("paper_pert_file")
-    if pf:
-        pp = pd.read_csv(REPO_ROOT / pf)
-        names = set(pp.loc[pp.split == label, "perturbation"])
-        if names:
-            sets["paper_pertset"] = (common & np.isin(ds.perts[te], list(names)), list(preds))
+    for set_name, path in (e.get("extra_eval_sets") or {}).items():   # restrict `common` to a named perturbation list
+        names = set(pd.read_csv(REPO_ROOT / path)["perturbation"])
+        sets[set_name] = (common & np.isin(ds.perts[te], list(names)), list(preds))
     out = []
     for set_name, (sel, models) in sets.items():
         info[f"n_eval_{set_name}"] = int(sel.sum())

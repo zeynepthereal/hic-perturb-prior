@@ -39,7 +39,7 @@ def main(run_dir: str):
     out = ["# Comparison with Ahlmann-Eltze et al. 2025 (Replogle K562)\n",
            "Paper rows: top-1000-expressed-genes L2 and Pearson delta, mean ± sd over their 2 splits (GEARS-processed data).",
            "Our rows: same metric definitions, mean ± sd over our splits. Every table states its eval_set and size.\n"]
-    for es in [e for e in ("common", "paper_pertset") if e in set(ours.eval_set)]:
+    for es in [e for e in ("common",) if e in set(ours.eval_set)]:
       for target in ("included", "excluded"):
         t = ours[(ours.eval_set == es) & (ours.target == target) & (ours.subset == "top1000_expr")].set_index("model")
         n, k = t.n_perts.mean(), t.n_splits.max()

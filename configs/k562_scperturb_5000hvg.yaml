@@ -14,6 +14,7 @@ eval:
   seeds: [0, 1, 2, 3, 4]
   split_fracs: [0.7, 0.1, 0.2]   # train / val / test over perturbations
   split_files: {}                # e.g. {gears_seed1: path/to/set2conditions.json} once available
+  extra_eval_sets: {gears_pertset: configs/gears_k562_perturbations.csv}   # diagnostic: same perturbations GEARS kept
   embeddings: [train_pca_expr]   # compared embeddings; PCA on training expression pseudobulks as in the paper's code
   refit_trainval: true
   paper_K: 10
