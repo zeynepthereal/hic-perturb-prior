@@ -6,8 +6,8 @@ Does 3D genome architecture (Hi-C) help predict transcriptional responses to *un
 ## Run
 ```bash
 mamba env create -f environment.yml && mamba activate hic-perturb-prior
-python -m src.run_baseline --config configs/k562_gears.yaml --preprocess            # GEARS-processed data, splits 1-5 (candidate primary)
-python -m src.run_baseline --config configs/k562_scperturb_5000hvg.yaml --preprocess # scPerturb raw counts (secondary)
+python -m src.run_baseline --config configs/k562_gears.yaml --preprocess            # PRIMARY: GEARS-processed data, GEARS-procedure splits 1-5
+python -m src.run_baseline --config configs/k562_scperturb_5000hvg.yaml --preprocess # scPerturb raw counts (SECONDARY)
 # GEARS splits (separate env, needs data/gears/...): mamba env create -f envs_gears.yml; mamba run -n hic-perturb-gears python scripts/make_gears_splits.py --seeds 1 2 3 4 5
 python -m src.compare_paper results/<run_dir>
 pytest src/test_synthetic.py
@@ -21,7 +21,7 @@ URL `https://zenodo.org/api/records/10044268/files/ReplogleWeissman2022_K562_ess
 1,546,729,675 bytes, MD5 `d8cba17576d1a8afc0f7d71b79cad0f7` (verified). 310,385 cells x 8,563 genes, raw UMI counts (dense float32),
 perturbation column `perturbation` (= target gene symbol), control label `control` (10,691 cells), 2,057 targeted genes.
 
-### GEARS-processed data (candidate primary benchmark)
+### GEARS-processed data (PRIMARY benchmark, `configs/k562_gears.yaml`)
 `replogle_k562_essential.zip` from Harvard Dataverse, `https://dataverse.harvard.edu/api/access/datafile/7458695`, 669,703,049 bytes,
 MD5 `84eed779531de88f83d3eb16a773a261` (= Dataverse's published MD5), SHA-256 `e769c89aa876061fdb3ac02a8de274f19a741a4f95decf14a52fd621d1eea319`.
 Contains only `perturb_processed.h5ad` (1,092 single perturbations incl. 680 whose target is not among its 5000 genes; 412 evaluable by the PCA model).
@@ -57,6 +57,12 @@ Paper (Replogle K562, top-1000 expressed genes, target included): mean L2 4.119 
   which preprocess the full dataset first). A 2nd-order effect: the HVG set decides which perturbations are evaluable (target must be a read-out gene).
 - `top1000_expr` uses control cells only; `top20_de` uses the observed test delta by design (oracle subset, evaluation only, never fed to a model).
 - Hyper-parameters are chosen on val perturbations only. The "paper" column uses fixed K=10, lambda=0.1.
+
+## Primary config and caveats
+`configs/k562_gears.yaml` is the primary benchmark (directly comparable to the literature). Caveats to carry into every comparison:
+(1) absolute L2 is ~4-6% above the paper's (Pearson and linear/mean ratios match); (2) the paper's own train/test splits are not recoverable
+(ours are regenerated with the GEARS procedure, seeds 1-5); (3) the PCA model can only predict perturbations whose target is a read-out gene (412 of 1092).
+The scPerturb pipeline (`configs/k562_scperturb_5000hvg.yaml`) is kept as a secondary config.
 
 ## Known deviations from the paper
 - scPerturb pipeline: own scanpy-seurat HVG replica (5000 genes), **no perturbation QC filtering** (QC only logged); not expected to match absolute numbers (see reproduction status).
