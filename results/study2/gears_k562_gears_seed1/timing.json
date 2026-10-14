@@ -1,0 +1,33 @@
+{
+ "label": "gears_seed1",
+ "args": {
+  "label": "gears_seed1",
+  "seed": 1,
+  "epochs": 20,
+  "hidden": 64,
+  "batch": 32,
+  "test_batch": 128,
+  "device": "mps",
+  "bench_steps": 40,
+  "bench_only": false,
+  "out": null
+ },
+ "torch": "2.14.1",
+ "cuda": false,
+ "mps_available": true,
+ "t_load_pertdata_s": 15.010508060455322,
+ "conditions_dropped_not_in_go_graph": {
+  "test": [
+   "C14orf178+ctrl",
+   "RPS10-NUDT3+ctrl",
+   "FAU+ctrl"
+  ],
+  "train": [
+   "C7orf26+ctrl",
+   "SEM1+ctrl"
+  ],
+  "val": []
+ },
+ "t_dataloader_s": 0.0038840770721435547,
+ "device_used": "mps"
+}

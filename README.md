@@ -124,3 +124,8 @@ The scPerturb pipeline (`configs/k562_scperturb_5000hvg.yaml`) is kept as a seco
 - GEARS pipeline: paper's exact splits unavailable (see above); linear model and mean baseline fit on the training split only (`refit_trainval: false`), as in the paper.
 - Early scPerturb results from commit-less / dirty-flag runs were superseded and deleted; all kept runs have a clean `git.json`.
 - Paper's 'val' perturbations are unused by its linear model; ours use them to tune K/lambda (secondary column only).
+
+## Study 2 (K562 discovery → RPE1 confirmation) — in progress
+Study 1 (`prereg-v1`) is closed; Study 2 never modifies it. Working log, rules and the data-access ledger: [`STUDY2_LOG.md`](STUDY2_LOG.md).
+- **Design:** K562 = discovery (exploratory); RPE1 = confirmation, analysed once under a new frozen pre-registration (`prereg-v2`); **no RPE1 Perturb-seq data is loaded or inspected before that**. Model families: linear (existing), graph-neighbour (`src/graphnn.py`), GEARS (cell-gears 0.1.2, separate env `hic-perturb-gears`); sources: standard (PCA / GO), + Hi-C, + matched control graph, mean baseline.
+- **Phase 1 (calibration only, no Hi-C vs control comparison on real data):** GEARS reproduction on K562 (`scripts/study2_gears_run.py`, `scripts/study2_gears_eval.py`, `scripts/study2_patch_gears.py`), graph-neighbour model with synthetic-data tests (`src/graphnn.py`, `src/test_graphnn.py`), RPE1 Hi-C QC gate (`scripts/study2_rpe1_hic_qc.py`, results in `results/study2/rpe1_hic_qc.json`).

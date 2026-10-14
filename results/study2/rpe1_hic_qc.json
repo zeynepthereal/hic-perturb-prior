@@ -1,0 +1,52 @@
+{
+ "RPE1 500kb": {
+  "total_contacts_in_pair_blocks": 62479963.0,
+  "bins": 6073,
+  "valid_bins": 5509,
+  "valid_fraction": 0.9071299193150009,
+  "bins_zero_coverage": 235,
+  "median_bin_coverage": 17742.0,
+  "cv_bin_coverage": 0.15447203843896715
+ },
+ "RPE1 500kb graph gate (node level)": {
+  "hic_trans": {
+   "components": 1,
+   "isolated_nodes": 564,
+   "node_rows_allzero_K10": 0.0,
+   "node_rows_allzero_K50": 0.0
+  },
+  "lin_randtrans_s0": {
+   "components": 1,
+   "isolated_nodes": 564,
+   "node_rows_allzero_K10": 0.0,
+   "node_rows_allzero_K50": 0.0
+  }
+ },
+ "RPE1 250kb": {
+  "total_contacts_in_pair_blocks": 62479963.0,
+  "bins": 12137,
+  "valid_bins": 11005,
+  "valid_fraction": 0.9067314822443767,
+  "bins_zero_coverage": 498,
+  "median_bin_coverage": 9183.0,
+  "cv_bin_coverage": 0.15853561795189822
+ },
+ "K562 (Study 1 reference) 500kb": {
+  "total_contacts_in_pair_blocks": 1908747765.0,
+  "bins": 6073,
+  "valid_bins": 5861,
+  "valid_fraction": 0.9650913881113123,
+  "bins_zero_coverage": 0,
+  "median_bin_coverage": 484506.0,
+  "cv_bin_coverage": 0.5275891329807973
+ },
+ "K562 (Study 1 reference) 250kb": {
+  "total_contacts_in_pair_blocks": 1908747769.0,
+  "bins": 12137,
+  "valid_bins": 11775,
+  "valid_fraction": 0.9701738485622476,
+  "bins_zero_coverage": 0,
+  "median_bin_coverage": 246692.0,
+  "cv_bin_coverage": 0.5869627834629786
+ }
+}

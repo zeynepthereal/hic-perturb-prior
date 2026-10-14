@@ -18,3 +18,8 @@ __pycache__/
 
 # raw per-perturbation metrics of the pre-registered runs are committed gzip-compressed (*.csv.gz); the large raw CSVs stay local
 results/*_prereg_*/per_perturbation_metrics.csv
+
+# Study 2: stdout logs with progress bars; keep small result files (incl. GEARS predictions npz)
+results/study2_gears_*_stdout.log
+!results/study2/**/*.npz
+results/study2/_aborted_cpu_run_gears_seed1/memory_samples.tsv

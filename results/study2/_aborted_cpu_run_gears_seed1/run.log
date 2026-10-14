@@ -1,0 +1,13 @@
+[   169.6s rss   4.0 GiB] PertData loaded (cell graphs built or read from cache): 166s
+[    18.0s rss   5.9 GiB] PertData loaded (cell graphs built or read from cache): 15s
+[    18.0s rss   5.9 GiB] conditions dropped (not in GEARS GO graph): {'test': ['C14orf178+ctrl', 'RPS10-NUDT3+ctrl', 'FAU+ctrl'], 'train': ['C7orf26+ctrl', 'SEM1+ctrl']}
+[    18.0s rss   5.9 GiB] dataloaders ready 0s {'train_loader': 3508, 'val_loader': 379, 'test_loader': 1184}
+[    19.0s rss   7.1 GiB] benchmark cpu FAILED AttributeError("'Series' object has no attribute 'nonzero'")
+[    19.3s rss   7.6 GiB] benchmark mps FAILED AttributeError("'Series' object has no attribute 'nonzero'")
+[    19.4s rss   5.2 GiB] device chosen: cpu
+[    17.7s rss   6.2 GiB] PertData loaded (cell graphs built or read from cache): 15s
+[    17.7s rss   6.2 GiB] conditions dropped (not in GEARS GO graph): {'test': ['C14orf178+ctrl', 'RPS10-NUDT3+ctrl', 'FAU+ctrl'], 'train': ['C7orf26+ctrl', 'SEM1+ctrl']}
+[    17.7s rss   6.2 GiB] dataloaders ready 0s {'train_loader': 3508, 'val_loader': 379, 'test_loader': 1184}
+[   468.6s rss   3.5 GiB] benchmark cpu 435.9s
+[   917.9s rss   3.6 GiB] benchmark mps 443.5s
+[   917.9s rss   3.6 GiB] device chosen: cpu

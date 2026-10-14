@@ -1,0 +1,43 @@
+{
+ "label": "gears_seed1",
+ "args": {
+  "label": "gears_seed1",
+  "seed": 1,
+  "epochs": 20,
+  "hidden": 64,
+  "batch": 32,
+  "test_batch": 128,
+  "device": "auto",
+  "bench_steps": 40,
+  "bench_only": false,
+  "out": null
+ },
+ "torch": "2.14.1",
+ "cuda": false,
+ "mps_available": true,
+ "t_load_pertdata_s": 14.603301286697388,
+ "conditions_dropped_not_in_go_graph": {
+  "test": [
+   "C14orf178+ctrl",
+   "RPS10-NUDT3+ctrl",
+   "FAU+ctrl"
+  ],
+  "train": [
+   "C7orf26+ctrl",
+   "SEM1+ctrl"
+  ],
+  "val": []
+ },
+ "t_dataloader_s": 0.004311084747314453,
+ "device_benchmark": {
+  "cpu": {
+   "ok": true,
+   "seconds_for_40_train_steps_plus_limited_eval": 435.9359927177429
+  },
+  "mps": {
+   "ok": true,
+   "seconds_for_40_train_steps_plus_limited_eval": 443.46806812286377
+  }
+ },
+ "device_used": "cpu"
+}

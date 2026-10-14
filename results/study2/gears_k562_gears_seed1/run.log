@@ -1,0 +1,3 @@
+[    18.4s rss   6.0 GiB] PertData loaded (cell graphs built or read from cache): 15s
+[    18.4s rss   6.0 GiB] conditions dropped (not in GEARS GO graph): {'test': ['C14orf178+ctrl', 'RPS10-NUDT3+ctrl', 'FAU+ctrl'], 'train': ['C7orf26+ctrl', 'SEM1+ctrl']}
+[    18.4s rss   6.0 GiB] dataloaders ready 0s {'train_loader': 3508, 'val_loader': 379, 'test_loader': 1184}
