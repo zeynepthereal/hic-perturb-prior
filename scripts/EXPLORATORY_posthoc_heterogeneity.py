@@ -48,7 +48,7 @@ fig, ax = plt.subplots(figsize=(7.5, 3.8)); fig.patch.set_facecolor("#fcfcfb"); 
 v = a.values * 1e4; hi = np.quantile(v, .995); lo = np.quantile(v, .005)
 ax.hist(np.clip(v, lo, hi), bins=60, color="#2a78d6", edgecolor="#fcfcfb", linewidth=0.5)
 ax.axvline(0, color="#52514e", lw=1); ax.axvline(D / N * 1e4, color="#eb6834", lw=2)
-ax.set_xlabel("a_i × 10⁴ (per-perturbation contribution to D; values beyond the 0.5/99.5 % quantiles are clipped to the end bins)"); ax.set_ylabel("perturbations")
+ax.set_xlabel("a_i × 10⁴   (end bins clip values beyond the 0.5 / 99.5 % quantiles)"); ax.set_ylabel("perturbations")
 ax.set_title(f"Per-perturbation contributions a_i (N = {N}); orange = mean of a_i = D/N", loc="left", fontsize=10, color="#52514e")
 ax.grid(color="#e4e3df", lw=0.6); ax.set_axisbelow(True)
 for sp_ in ("top", "right"): ax.spines[sp_].set_visible(False)
