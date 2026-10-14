@@ -1,5 +1,5 @@
 {
- "git_commit": "9a01f359a593bf5a94684157001961e516893de8",
+ "git_commit": "534b22cab3aa50a35ce13140177025042c59f42e",
  "git_dirty": false,
  "sources": {
   "hic": "ENCODE ENCFF616PUW (md5 d4b999471d4c17a74f1e66370c0012e3, remote read)",
@@ -168,8 +168,8 @@
   "configs/prereg/primary.yaml": "37eea32107f524878938c6f4b2971b5434cb9557442a39bb6c06bb2447ee532e",
   "configs/prereg/s10_exclusion.yaml": "39976791839ed8ad5ab4ad8a727a0c5377898c998eabfbf14f76e31b431b5cf0",
   "configs/prereg/s1_factorial.yaml": "57d9fd301195432f3ebc33b51a9b4330bfd1f27a78b91e3759945f12d225bc03",
-  "configs/prereg/s2_nulls.yaml": "a1e8df64551d347c56279434f258361ab0a99308f745d54ed227611dcb5e9da4",
-  "configs/prereg/s3_resid.yaml": "cb5e07d50f425efa34bc4d679f446a95af80066ba25467b02719ac4fcd70ef13",
+  "configs/prereg/s2_nulls.yaml": "1d0f2f07550a3872d284aa65942e9c8f5d573dbbbf3fb801ac045d6579e71222",
+  "configs/prereg/s3_resid.yaml": "15dc05e83571da5837e9fd97f13c0f1f27e07e0889c4a77cf07285b063ea5a8c",
   "configs/prereg/s4_pca_extended.yaml": "f0c802ae49f5e00cf7a464095802f5460020a0495a7df8ad53c957350f216840",
   "configs/prereg/s8_resolution.yaml": "96e5239b6efcf1aac12ad97657411554f37548b044fc5b5dfc841641372227c3",
   "data/k562_regions_raw/ENCFF486MJU.bed.gz": "5553d21bc8f61f3db3584f086c631346583472a775f69a9eb495b610c55ab8b0",
@@ -179,9 +179,9 @@
   "results/hic/symbol_map.csv": "f74bf94c1df35a43b71dc6ee815410a8e3d38d8cf160c802e7d488bd7607618c",
   "data/processed/k562_gears.npz": "35754a308283dbf154f3ded746502d6b6a606c59d0adb4c69ea5bf7f53a92973",
   "configs/k562_rearranged_regions_hg38.bed": "6899601be378ef7215c38874713de99d384f3ebc8c6ab553e2a694573a425468",
-  "PREREGISTRATION.md": "f274b4915b3e058dc265e7b15e4931ce13f9167c35b2836e6daf9e97f750ea3a",
+  "PREREGISTRATION.md": "2f3588311eaee432774f5415414b91497b7840d3101198ac2df1ed25302e5540",
   "results/hic_v2/ab_500k.csv": "c9fce3c12df65bce27e987e29869506a1bac592549e21ef6ae5be2859517f863",
   "results/hic_v2/ab_250k.csv": "9374d2f0b4c8f5737e25e0e0831c5f5f75bc0efde167e41feb6c7d566adde955",
-  "results/hic_v2/zero_rows.csv": "cfccb85b7d104875c883a1783f56426b30a82f3b6e3cf60b52e8a10bd0683c8c"
+  "results/hic_v2/zero_rows.csv": "f19cb3deffebe34f114ea7cdb43d03410c4f2b6875755ae401d3d6ee482d0b73"
  }
 }
