@@ -55,3 +55,17 @@ None of these changes an analytical choice; they are recorded for completeness.
 - **Storage of large outputs.** `per_perturbation_metrics.csv` of the primary (47.9 MB) and S3 (100.9 MB) runs are committed as `.csv.gz` (round-trip SHA-256 verified); the raw CSVs are git-ignored (`.gitignore`) to respect the 50 MB file limit. `scripts/run_primary_analysis.py` reads the CSV: `gunzip -k` the file first.
 - **Rewired graphs.** The 20 degree-preserving-rewire graphs (and their embeddings) of the S2 null are built lazily from fixed seeds (0–19) at analysis time and are therefore not in the frozen manifest; the SHA-256 of all `*__rewire*` artifacts is recorded in `results/<null run>/rewire_artifacts_sha256.json`.
 - **Results record.** `results/PREREG_ANALYSIS_SUMMARY.md` collects the numbers and the pre-registered labels; per-run details are in each run directory (config, git.json, per-case metrics).
+
+## D6 — Pre-registered S4 / S9 executed with a new script (2026-10-14)
+
+- **What:** the pre-registered secondary S4 (each arm vs the mean baseline on the primary test cases) and the S4/S9 PCA reference were run with `scripts/run_s4_vs_mean.py` (committed before the run, code commit `049388b`; run directory `results/*_prereg_s4_vs_mean`). The script only calls frozen functions (`paired_table`, `signflip_test`, `NullEvaluator`); D is defined as in the primary with the mean baseline as reference (positive = arm better).
+- **Settings not fixed by the registration:** the 1,000 random-Gaussian arms use 10,000 permutations and 1,000 bootstrap draws per arm (the named arms use the frozen 100,000 / 10,000); the PCA reference uses the `common` set of the PCA-only sanity run (PCA-predictable subset, 517 cases), which is bit-identical to the earlier `k562_gears` run (sanity check 1). K = 50 uses the fixed K = 50, λ = 0.1 models of the primary run.
+
+## D7 — EXPLORATORY, POST HOC, NOT PRE-REGISTERED: heterogeneity of the primary effect (2026-10-14)
+
+- Done **after** the pre-registered results were known, at the owner's request. Script `scripts/EXPLORATORY_posthoc_heterogeneity.py`; output directory `results/*_EXPLORATORY_posthoc_primary_heterogeneity` (README states the same). Contents: distribution of the per-perturbation contributions a_i (quantiles, histogram), concentration of D in the largest contributors, per-split concentration, and the ten largest contributors to D in split 1 (target gene, chromosome, membership of the target bin in an S10 rearranged region).
+- **Descriptive only: no tests, no p-values.** It changes no registered label or conclusion and is not part of the confirmatory analysis.
+
+## D8 — OpenTimestamps upgrade attempt (2026-10-14T21:07Z)
+
+`ots upgrade` on both proofs (about 28 minutes after stamping) did **not** complete: the calendars `alice.btc.calendar.opentimestamps.org` (tx `c781f9850e206433f0e42ba36c5c73fb67b1d868756b3225a713b227dcf91380`) and `bob.btc.calendar.opentimestamps.org` (tx `88c3c62fc5510473b91926b9fc5badff136f8cd505416167b12769fafaf6e2f6`) report the digests are included in Bitcoin transactions and are waiting for 6 confirmations; `btc.calendar.catallaxy.com` is pending; `finney.calendar.eternitywall.com` timed out. The `.ots` files are unchanged (identical SHA-256 before and after), so nothing was committed. To be retried.
