@@ -15,8 +15,10 @@ from scipy import stats as sps
 
 
 def _per_case(q: pd.DataFrame, models, metric: str) -> pd.Series:
-    """metric of one model, or the average over several models (e.g. the 10 random-trans control seeds), per (pert_i, split);
-    cases for which not every listed model has a value are dropped."""
+    """metric of one model, or the AVERAGE OF THE PER-CASE METRIC VALUES of several models (e.g. the 10 random-trans control seeds),
+    per (pert_i, split). This is the mean of ten L2 values, each computed from that seed's OWN prediction; it is deliberately NOT the L2
+    of an averaged (ensembled) prediction, which would be lower by Jensen's inequality and would hand the control an ensemble advantage.
+    Cases for which not every listed model has a value are dropped."""
     models = [models] if isinstance(models, str) else list(models)
     cols = [q[q.model == m].set_index(["pert_i", "split"])[metric].rename(m) for m in models]
     return pd.concat(cols, axis=1, join="inner").dropna().mean(axis=1)
@@ -98,4 +100,28 @@ def primary_analysis(per_pert: pd.DataFrame, new: str, control_models, *, n_perm
     res = signflip_test(d, n_perm=n_perm, seed=seed)
     delta = sesoi(d)
     tost = tost_signflip(d, delta, n_perm=n_perm, seed=seed + 100)
-    return {**res, **tost, "control_mean": float(d["ref_value"].mean()), "decision": classify(res["p_signflip"], res["D"], tost["p_tost"])}
+    ranks = seed_rank_summary(per_pert, new, control_models, **kw)
+    return {**res, **tost, "control_mean": float(d["ref_value"].mean()), "decision": classify(res["p_signflip"], res["D"], tost["p_tost"]),
+            "seed_ranks_descriptive": ranks}
+
+
+def seed_rank_summary(per_pert: pd.DataFrame, new: str, control_models, *, eval_set="common", target="excluded", subset="top1000_expr",
+                      metric: str = "l2") -> dict:
+    """DESCRIPTIVE companion to the primary test (no p-value): rank of the Hi-C arm's mean test metric among the control seeds.
+    Per split: mean over that split's test cases of the metric for the Hi-C arm and for each control seed; rank 1 = best (lowest L2 /
+    highest correlation) among the 1 + n_seeds values, and the number of control seeds beaten strictly. Pooled: mean of the split means
+    (equal weight per split, the same aggregation as the primary effect D). Cases need a value for the Hi-C arm and every control seed."""
+    controls = [control_models] if isinstance(control_models, str) else list(control_models)
+    q = per_pert[(per_pert.eval_set == eval_set) & (per_pert.target == target) & (per_pert["subset"] == subset)]
+    cols = {m: q[q.model == m].set_index(["pert_i", "split"])[metric] for m in [new] + controls}
+    T = pd.concat(cols, axis=1, join="inner").dropna()
+    lower_better = metric == "l2"
+    per_split = T.groupby(level="split").mean()
+    pooled = per_split.mean()
+
+    def rank(v):
+        c = v[controls]
+        beaten = int((c > v[new]).sum()) if lower_better else int((c < v[new]).sum())
+        return dict(hic=float(v[new]), control_mean=float(c.mean()), control_min=float(c.min()), control_max=float(c.max()),
+                    rank=1 + (len(controls) - beaten - int((c == v[new]).sum())), n_controls_beaten=beaten, n_controls=len(controls))
+    return dict(per_split={s: rank(per_split.loc[s]) for s in per_split.index}, pooled=rank(pooled), n_cases=int(len(T)))

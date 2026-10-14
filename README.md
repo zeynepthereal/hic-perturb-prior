@@ -101,16 +101,16 @@ Pipeline: `scripts/fetch_hic.py trans 500000|250000` (all chromosome pairs, full
   The control `lin_cis` is localized (62 % of nodes non-zero in its first 10 dims). Details and open decisions in `PREREGISTRATION.md` (DRAFT, not frozen; no Hi-C model has been run).
 - `src/stats.py`: paired per-perturbation comparison + sign-flip permutation test for the pre-registered primary analysis (tested). `configs/prereg/*.yaml`: one config per pre-registered analysis, **not to be run before freeze**.
 
-## Week 2 part 3: connected control, equivalence testing, pre-registration v0.2 (DRAFT, not frozen)
+## Week 2 part 3: connected control, equivalence testing, pre-registration v0.3 (DRAFT, not frozen)
 - **Primary control replaced**: `b500_lin_cis` has 51 % all-zero P rows at K=10 (one component per chromosome => the slowest modes sit on a few chromosomes). New control
   `b500_lin_randtrans_s0..s9`: linear chain per chromosome + trans edges from a degree-preserving, inter-chromosomal-constrained randomization of the Hi-C trans graph
   (`src/hic/bins.py::rewire_trans`; per-node trans degrees, edge count and weight multiset identical; connected; 0 % zero rows). Control prediction = per-case L2 averaged over the 10 seeds.
 - **Gate**: `results/hic_v2/zero_rows.csv`: fraction of all-zero P rows for every embedding (> 5 % => not eligible as primary comparator).
-- **Statistics** (`src/stats.py`): paired sign-flip test (perturbation-level), SESOI = 0.5 % of the control mean L2, TOST equivalence, decision rule significant / equivalent / inconclusive, `primary_analysis`.
+- **Statistics** (`src/stats.py`): paired sign-flip test (perturbation-level; control = mean of per-seed case-level L2, never an averaged prediction), SESOI = 0.5 % of the control mean L2, TOST equivalence, decision rule significant / equivalent / inconclusive, descriptive rank of the Hi-C arm among the control seeds, `primary_analysis`.
 - **Extra variants**: `:percomp` (per-component eigenvectors, proportional allocation) for cis-only cells; `b500x_*` = K562 amplified/translocated regions removed before balancing
   (`configs/k562_rearranged_regions_hg38.bed`, sources and md5s in its header; `scripts/make_k562_regions.py`); `eval.extra_fixed_hp` for fixed K=20/50 models.
 - **Diagnostics**: `results/hic_v2/diagnostics_randtrans.md`, `zero_rows*.csv`. RPE1 availability (not downloaded) is documented in `PREREGISTRATION.md` (R1).
-- `PREREGISTRATION.md` v0.2 and `configs/prereg/` are the documents to approve; nothing has been run on perturbation data.
+- `PREREGISTRATION.md` v0.3 (DRAFT) and `configs/prereg/` are the documents to approve; nothing has been run on perturbation data.
 
 ## Primary config and caveats
 `configs/k562_gears.yaml` is the primary benchmark (directly comparable to the literature). Caveats to carry into every comparison:

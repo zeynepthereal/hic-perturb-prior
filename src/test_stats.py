@@ -60,3 +60,30 @@ def test_control_averaged_over_models_and_primary_analysis():
     assert abs(d["d"].mean() - 0.06) < 0.01                                          # control = average of the three control models
     r = primary_analysis(pp, "hic", ["c0", "c1", "c2"], n_perm=2000)
     assert r["decision"] == "SIGNIFICANT: Hi-C better" and abs(r["control_mean"] - 4.06) < 0.02
+
+
+def test_control_is_mean_of_per_case_l2_not_l2_of_mean_prediction():
+    # Jensen: if two control seeds err in opposite directions, the L2 of their AVERAGED prediction is smaller than the AVERAGE of their L2s.
+    obs = np.array([1.0, 0.0])
+    p1, p2 = np.array([1.5, 0.5]), np.array([0.5, -0.5])
+    l2 = lambda p: float(np.sqrt(((p - obs) ** 2).sum()))
+    avg_of_l2, l2_of_avg = (l2(p1) + l2(p2)) / 2, l2((p1 + p2) / 2)
+    assert l2_of_avg < avg_of_l2                                   # the ensemble advantage we must NOT give the control
+    pp = pd.DataFrame({"pert_i": [0, 0, 0], "split": "s", "model": ["c0", "c1", "hic"], "eval_set": "common", "target": "excluded",
+                       "subset": "top1000_expr", "l2": [l2(p1), l2(p2), 1.0], "pearson": 0.0})
+    assert abs(paired_table(pp, ["c0", "c1"], "hic")["ref_value"].iloc[0] - avg_of_l2) < 1e-12
+
+
+def test_seed_rank_summary():
+    from .stats import seed_rank_summary
+    rows = []
+    for s in ("a", "b"):
+        for i in range(30):
+            rows += [(i, s, "hic", "common", "excluded", "top1000_expr", 4.0, 0.0)]
+            rows += [(i, s, f"c{k}", "common", "excluded", "top1000_expr", 3.91 + 0.05 * k + (0.2 if s == "b" else 0.0), 0.0) for k in range(10)]
+    pp = pd.DataFrame(rows, columns=["pert_i", "split", "model", "eval_set", "target", "subset", "l2", "pearson"])
+    r = seed_rank_summary(pp, "hic", [f"c{k}" for k in range(10)])
+    # split a: controls 3.91..4.36, hic 4.0 -> beats the 8 controls above 4.0 (k=2..9), 2 are better -> rank 3; split b: controls 4.11..4.56 -> rank 1
+    assert r["per_split"]["a"]["n_controls_beaten"] == 8 and r["per_split"]["a"]["rank"] == 3
+    assert r["per_split"]["b"]["rank"] == 1 and r["per_split"]["b"]["n_controls_beaten"] == 10
+    assert r["pooled"]["n_controls"] == 10 and 1 <= r["pooled"]["rank"] <= 11
