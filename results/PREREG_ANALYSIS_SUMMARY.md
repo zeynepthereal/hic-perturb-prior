@@ -39,6 +39,6 @@ K = 10 is decisive; K = 50 is the key secondary (null part only; the K = 50 cont
 | tier | outcome |
 |---|---|
 | Tier 1 (H1 supported): decision "SIGNIFICANT: Hi-C better" and D above all three K=10 nulls | **True** |
-| Tier 2 (mechanistic): Tier 1 and S3  vs  significant, Hi-C better | **False** — S3 decision label: **INCONCLUSIVE** (D = -0.009257, p = 0.226298, 95 % CI [-0.024779, 0.004643], TOST p = 0.054909, δ = 0.021254) |
+| Tier 2 (mechanistic): Tier 1 and S3 (`b500_hic_trans:resid` vs `b500_lin_randtrans:resid`) significant, Hi-C better | **False** — S3 decision label: **INCONCLUSIVE** (D = -0.009257, p = 0.226298, 95 % CI [-0.024779, 0.004643], TOST p = 0.054909, δ = 0.021254) |
 
 No other secondary analysis has been run.
