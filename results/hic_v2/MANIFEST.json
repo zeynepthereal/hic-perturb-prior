@@ -1,5 +1,5 @@
 {
- "git_commit": "534b22cab3aa50a35ce13140177025042c59f42e",
+ "git_commit": "a7db2dd965928319fd7a0ebb3cc30ba03cd6da9e",
  "git_dirty": false,
  "sources": {
   "hic": "ENCODE ENCFF616PUW (md5 d4b999471d4c17a74f1e66370c0012e3, remote read)",
@@ -179,7 +179,7 @@
   "results/hic/symbol_map.csv": "f74bf94c1df35a43b71dc6ee815410a8e3d38d8cf160c802e7d488bd7607618c",
   "data/processed/k562_gears.npz": "35754a308283dbf154f3ded746502d6b6a606c59d0adb4c69ea5bf7f53a92973",
   "configs/k562_rearranged_regions_hg38.bed": "6899601be378ef7215c38874713de99d384f3ebc8c6ab553e2a694573a425468",
-  "PREREGISTRATION.md": "2f3588311eaee432774f5415414b91497b7840d3101198ac2df1ed25302e5540",
+  "PREREGISTRATION.md": "d389a4655dbfd07e866e9ee7300b001bb8faacf945f5ac30114aa80bcd09e0ee",
   "results/hic_v2/ab_500k.csv": "c9fce3c12df65bce27e987e29869506a1bac592549e21ef6ae5be2859517f863",
   "results/hic_v2/ab_250k.csv": "9374d2f0b4c8f5737e25e0e0831c5f5f75bc0efde167e41feb6c7d566adde955",
   "results/hic_v2/zero_rows.csv": "f19cb3deffebe34f114ea7cdb43d03410c4f2b6875755ae401d3d6ee482d0b73"
