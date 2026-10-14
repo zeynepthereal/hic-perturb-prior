@@ -29,7 +29,8 @@ cfg("s1_factorial", ["b500_hic_trans", "b500_hic_cis", "b500_lin_trans", "b500_l
     "nulls": {"permutation": {"n": 1000}, "random_gaussian": {"n": 1000}, "rewire": {"n": 20}},
     "eval": {"split_files": {f"gears_seed{s}": f"configs/splits/gears_k562_seed{s}.json" for s in range(1, 6)}, "metric": "L2 top1000 expressed genes, target excluded",
              "refit_trainval": False}}, sort_keys=False))
-cfg("s3_resid", ["b500_hic_trans", "b500_hic_trans:resid", "b500_hic_cis:resid"] + CTRL, "S3 position-residualized embeddings vs control")
+cfg("s3_resid", ["b500_hic_trans", "b500_hic_trans:resid", "b500_hic_cis:resid"] + CTRL + [f"{c}:resid" for c in CTRL],
+    "S3 Tier-2 test: b500_hic_trans:resid vs b500_lin_randtrans:resid (identical residualization, 10 control seeds); hic_cis:resid exploratory")
 cfg("s4_pca_extended", ["train_pca_expr", "b500_hic_trans"] + CTRL, "S4/S9 PCA reference on its predictable subset + extended eval set vs mean baseline")
 cfg("s8_resolution", ["b250_hic_trans"] + [f"b250_lin_randtrans_s{k}" for k in range(10)] + ["b250_hic_cis", "b250_lin_cis", "b250_lin_trans", "hic_local25k"],
     "S8 250 kb analogue of the primary contrast + local 25 kb graph")

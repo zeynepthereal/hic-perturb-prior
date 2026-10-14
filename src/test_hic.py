@@ -75,3 +75,10 @@ def test_percomp_allocation_and_matrix():
     assert E.shape == (70, 6) and not np.isnan(E).any()
     assert np.all(E[:30][:, np.abs(E[:30]).sum(0) > 0].shape[1] >= 1)
     assert (np.abs(E[60:]).sum(1) > 0).all()                                            # the small chain still gets a non-zero row
+
+
+def test_resid_names_parse_for_control_seeds():
+    from .hic.embeddings import make_embedding
+    e = make_embedding("b500_lin_randtrans_s7:resid")
+    assert e.base == "b500_lin_randtrans_s7" and e.resid and not e.percomp and e.name == "b500_lin_randtrans_s7:resid"
+    assert make_embedding("b500_hic_trans:resid").resid

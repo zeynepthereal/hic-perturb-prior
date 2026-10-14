@@ -16,6 +16,7 @@ ds = PerturbationDataset.load("data/processed/k562_gears.npz")
 names = sorted({f.name[: -len("_spectral.npz")] for f in ART.glob("*_spectral.npz") if "__rewire" not in f.name})
 extra = [f"{b}:{s}" for b in ("b500_hic_trans", "b500_hic_cis", "b500_lin_cis", "b500_lin_trans") for s in ("resid", "perm:0", "random:0", "rewire:0") if
          not (s == "resid" and "lin" in b)] + [f"{b}:percomp" for b in ("b500_hic_cis", "b500_lin_cis", "b250_hic_cis", "b250_lin_cis")]
+extra += [f"b500_lin_randtrans_s{k}:resid" for k in range(10)]   # Tier-2 control (v0.5): residualized with the same basis as b500_hic_trans:resid
 names = [n for n in names if re.match(r"^(hic_local25k|b\d+x?_(hic|lin)_(trans|cis|randtrans_s\d+))$", n)] + [n for n in extra if (ART / (n.split(":")[0] + "_spectral.npz")).exists()]
 rows = []
 for n in names:

@@ -51,6 +51,8 @@ b500_lin_cis:rewire:0,10,1,1092.0,0.0,0.0,0.0,True
 b500_lin_cis:rewire:0,50,1,1092.0,0.0,0.0,0.0,True
 b500_lin_randtrans_sXX,10,10,1092.0,0.0,0.0,0.0,True
 b500_lin_randtrans_sXX,50,10,1092.0,0.0,0.0,0.0,True
+b500_lin_randtrans_sXX:resid,10,10,1092.0,0.0,0.0,0.0,True
+b500_lin_randtrans_sXX:resid,50,10,1092.0,0.0,0.0,0.0,True
 b500_lin_trans,10,1,1092.0,0.0,0.0,0.0,True
 b500_lin_trans,50,1,1092.0,0.0,0.0,0.0,True
 b500_lin_trans:perm:0,10,1,1092.0,0.0,0.0,0.0,True

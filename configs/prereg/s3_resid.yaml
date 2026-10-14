@@ -1,4 +1,4 @@
-# PRE-REGISTERED (S3 position-residualized embeddings vs control). DO NOT RUN before the pre-registration is frozen.
+# PRE-REGISTERED (S3 Tier-2 test: b500_hic_trans:resid vs b500_lin_randtrans:resid (identical residualization, 10 control seeds); hic_cis:resid exploratory). DO NOT RUN before the pre-registration is frozen.
 name: prereg_s3_resid
 data:
   source: gears
@@ -33,6 +33,16 @@ eval:
   - b500_lin_randtrans_s7
   - b500_lin_randtrans_s8
   - b500_lin_randtrans_s9
+  - b500_lin_randtrans_s0:resid
+  - b500_lin_randtrans_s1:resid
+  - b500_lin_randtrans_s2:resid
+  - b500_lin_randtrans_s3:resid
+  - b500_lin_randtrans_s4:resid
+  - b500_lin_randtrans_s5:resid
+  - b500_lin_randtrans_s6:resid
+  - b500_lin_randtrans_s7:resid
+  - b500_lin_randtrans_s8:resid
+  - b500_lin_randtrans_s9:resid
   refit_trainval: false
   paper_K: 10
   paper_lambda: 0.1
