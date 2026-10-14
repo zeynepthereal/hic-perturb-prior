@@ -1,4 +1,4 @@
-"""python -m scripts.fetch_hic cis|trans   (remote reads; caches sparse/dense derived matrices in data/hic/)"""
+"""python -m scripts.fetch_hic cis|trans [res]   (remote reads; caches sparse/dense derived matrices in data/hic/)"""
 import sys
 import time
 from multiprocessing import Pool
@@ -21,9 +21,11 @@ if __name__ == "__main__":
         with Pool(4) as p:
             for path, n in p.imap_unordered(_cis, order):
                 print(f"{path} records={n} t={time.time()-t0:.0f}s", flush=True)
-    else:
-        Path("data/hic/pairs_500kb").mkdir(parents=True, exist_ok=True)
-        jobs = [(a, b, TRANS_RES, "data/hic/pairs_500kb") for i, a in enumerate(HIC_CHROMS) for b in HIC_CHROMS[i:]]
+    else:   # `trans` (500 kb, default) or `trans 250000`: ALL chromosome pairs incl. the full cis range, raw counts
+        res = int(sys.argv[2]) if len(sys.argv) > 2 else TRANS_RES
+        out = f"data/hic/pairs_{res // 1000}kb"
+        Path(out).mkdir(parents=True, exist_ok=True)
+        jobs = [(a, b, res, out) for i, a in enumerate(HIC_CHROMS) for b in HIC_CHROMS[i:]]
         with Pool(4) as p:
             for path, n in p.imap_unordered(fetch_pair, jobs):
                 print(f"{path} records={n} t={time.time()-t0:.0f}s", flush=True)
