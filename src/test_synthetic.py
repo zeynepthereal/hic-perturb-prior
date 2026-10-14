@@ -76,3 +76,28 @@ def test_unpredictable_perts_get_nan_and_eval_sets():
     assert set(per.eval_set) == {"common"} and info["n_eval_common"] == int((ds.target_idx[100:] >= 0).sum())
     assert not per.l2.isna().any()
     assert "linear[train_pca_expr] (fixed K=3, lam=0.1)" in set(per.model)
+
+
+def test_lean_null_evaluator_matches_standard_path():
+    """NullEvaluator must give the same case-level L2 as evaluate.run_split (fixed K, lambda; top-N expressed genes; target excluded)."""
+    from .baselines import EMBEDDINGS, Embedding, pca_gene_embedding
+    from .evaluate import lm_name, run_split
+    from .nulls import NullEvaluator
+    ds = _toy_ds(n_pert=150, n_gene=80, n_missing=0, seed=3)
+    rng = np.random.RandomState(4)
+    P = rng.randn(150, 4)
+    P[::17] = np.nan                                                      # some perturbations unpredictable
+
+    class Fixed(Embedding):
+        def predictable(self, d): return ~np.isnan(P).any(1)
+        def fit(self, Y, tr, d, K): return pca_gene_embedding(Y + d.ctrl_mean, K), P[:, :K]
+    EMBEDDINGS["__toy_fixed"] = Fixed()
+    perm = np.random.RandomState(5).permutation(150)
+    split = {"train": np.sort(perm[:100]), "val": np.sort(perm[100:115]), "test": np.sort(perm[115:])}
+    cfg = {"eval": {"embeddings": ["__toy_fixed"], "exclude_target_primary": True, "K_grid": [4], "lambda_grid": [0.1], "paper_K": 4, "paper_lambda": 0.1,
+                    "n_top_de": 5, "n_top_expr": 20, "refit_trainval": False}}
+    per, _, _ = run_split(ds, cfg, split, "s", 0)
+    std = per[(per.eval_set == "common") & (per.target == "excluded") & (per["subset"] == "top1000_expr") & (per.model == lm_name("__toy_fixed", False))]
+    std = std.set_index(["pert_i", "split"])["l2"].sort_index()
+    fast = NullEvaluator(ds, {"s": split}, K=4, lam=0.1, n_top_expr=20, n_top_de=5).case_l2(P[:, :4]).sort_index()
+    assert len(std) == len(fast) > 20 and np.allclose(std.values, fast.values, atol=1e-9)

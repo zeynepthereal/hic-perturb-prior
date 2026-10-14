@@ -125,3 +125,32 @@ def seed_rank_summary(per_pert: pd.DataFrame, new: str, control_models, *, eval_
         return dict(hic=float(v[new]), control_mean=float(c.mean()), control_min=float(c.min()), control_max=float(c.max()),
                     rank=1 + (len(controls) - beaten - int((c == v[new]).sum())), n_controls_beaten=beaten, n_controls=len(controls))
     return dict(per_split={s: rank(per_split.loc[s]) for s in per_split.index}, pooled=rank(pooled), n_cases=int(len(T)))
+
+
+def null_effect(ctrl: pd.Series, other: pd.Series) -> float:
+    """D of an arm against the control from case-level L2 Series indexed by (pert_i, split):
+    D = (1/S) sum_s mean_{i in test_s} [L2_C(i,s) - L2_arm(i,s)]  (same pairing and split weighting as the primary D).
+    Used for the observed Hi-C arm (other = Hi-C) and for every null draw j (D_j with other = null_j)."""
+    j = pd.concat([ctrl.rename("c"), other.rename("o")], axis=1, join="inner").dropna()
+    split = j.index.get_level_values("split")
+    S = split.nunique()
+    n_s = pd.Series(split).map(pd.Series(split).value_counts()).values
+    return float((((j["c"] - j["o"]).values) / n_s / S).sum())
+
+
+def empirical_p(D_obs: float, null_D) -> float:
+    """(1 + #{null D_j >= D_obs}) / (1 + n_null)"""
+    null_D = np.asarray(null_D)
+    return float((1 + (null_D >= D_obs).sum()) / (1 + len(null_D)))
+
+
+def h1_support(D_obs: float, D_perm, D_rand, D_rewire, level: float = 0.95) -> dict:
+    """Pre-registered H1 support condition (null part): D_obs must exceed the 95th percentile of the gene-label-permutation null AND the
+    95th percentile of the random-Gaussian null AND the maximum over ALL rewire seeds (20 in the registration).
+    Also reports the empirical p of each null: (1 + #{D_j >= D_obs}) / (1 + n_null)."""
+    D_perm, D_rand, D_rewire = map(np.asarray, (D_perm, D_rand, D_rewire))
+    q = {"permutation_q95": float(np.quantile(D_perm, level)), "random_gaussian_q95": float(np.quantile(D_rand, level)), "rewire_max": float(D_rewire.max())}
+    support = {"permutation": bool(D_obs > q["permutation_q95"]), "random_gaussian": bool(D_obs > q["random_gaussian_q95"]), "rewire": bool(D_obs > q["rewire_max"])}
+    p = {"permutation": empirical_p(D_obs, D_perm), "random_gaussian": empirical_p(D_obs, D_rand), "rewire": empirical_p(D_obs, D_rewire)}
+    return {"thresholds": q, "support_by_null": support, "support": bool(all(support.values())), "p": p,
+            "n_null": {"permutation": len(D_perm), "random_gaussian": len(D_rand), "rewire": len(D_rewire)}}

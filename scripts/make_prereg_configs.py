@@ -22,8 +22,13 @@ def cfg(name, embeddings, note):
 cfg("primary", ["b500_hic_trans"] + CTRL, "H1 primary: b500_hic_trans vs the 10 matched random-trans control seeds, K=10 lambda=0.1; K=50 fixed = KEY secondary")
 cfg("s1_factorial", ["b500_hic_trans", "b500_hic_cis", "b500_lin_trans", "b500_lin_cis"] + [f"b500_hic_randtrans_s{k}" for k in range(10)] + CTRL +
     ["b500_hic_cis:percomp", "b500_lin_cis:percomp"], "S1 factorial cis{hic,lin} x trans{hic,randtrans,none} + per-component cis-only variants")
-cfg("s2_nulls", ["b500_hic_trans"] + [f"b500_hic_trans:perm:{k}" for k in range(10)] + [f"b500_hic_trans:rewire:{k}" for k in range(5)] +
-    [f"b500_hic_trans:random:{k}" for k in range(10)], "S2 nulls: permutation x10, rewire x5, random x10")
+# S2 nulls are evaluated by the lean driver `python -m src.nulls --config configs/prereg/s2_nulls.yaml` (fixed K and lambda only):
+# permutation x1000 and random Gaussian x1000 (no new eigendecomposition), rewire x20; K=10 decides H1 support, K=50 is the key-secondary analogue.
+(OUT / "s2_nulls.yaml").write_text("# PRE-REGISTERED (S2 nulls + H1 support condition). DO NOT RUN before the pre-registration is frozen.\n" + yaml.safe_dump({
+    "name": "prereg_s2_nulls", "data": {"processed_path": "data/processed/k562_gears.npz"}, "hic": "b500_hic_trans", "control": CTRL, "K": [10, 50], "lambda": 0.1,
+    "nulls": {"permutation": {"n": 1000}, "random_gaussian": {"n": 1000}, "rewire": {"n": 20}},
+    "eval": {"split_files": {f"gears_seed{s}": f"configs/splits/gears_k562_seed{s}.json" for s in range(1, 6)}, "metric": "L2 top1000 expressed genes, target excluded",
+             "refit_trainval": False}}, sort_keys=False))
 cfg("s3_resid", ["b500_hic_trans", "b500_hic_trans:resid", "b500_hic_cis:resid"] + CTRL, "S3 position-residualized embeddings vs control")
 cfg("s4_pca_extended", ["train_pca_expr", "b500_hic_trans"] + CTRL, "S4/S9 PCA reference on its predictable subset + extended eval set vs mean baseline")
 cfg("s8_resolution", ["b250_hic_trans"] + [f"b250_lin_randtrans_s{k}" for k in range(10)] + ["b250_hic_cis", "b250_lin_cis", "b250_lin_trans", "hic_local25k"],

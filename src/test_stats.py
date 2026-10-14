@@ -87,3 +87,18 @@ def test_seed_rank_summary():
     assert r["per_split"]["a"]["n_controls_beaten"] == 8 and r["per_split"]["a"]["rank"] == 3
     assert r["per_split"]["b"]["rank"] == 1 and r["per_split"]["b"]["n_controls_beaten"] == 10
     assert r["pooled"]["n_controls"] == 10 and 1 <= r["pooled"]["rank"] <= 11
+
+
+def test_null_effect_matches_primary_D_and_h1_support():
+    from .stats import empirical_p, h1_support, null_effect
+    rng = np.random.RandomState(7)
+    cases = _cases(0.1, n_pert=300, seed=7)
+    ctrl = cases.assign(v=4.0 + rng.rand(len(cases))).set_index(["pert_i", "split"])["v"]
+    hic = ctrl - cases.set_index(["pert_i", "split"])["d"]
+    D = null_effect(ctrl, hic)
+    assert abs(D - signflip_test(cases, n_perm=100, n_boot=10)["D"]) < 1e-12                 # same pairing / split weighting as the primary D
+    assert empirical_p(1.0, [0.5] * 999 + [2.0]) == (1 + 1) / (1 + 1000)
+    s = h1_support(0.5, np.linspace(-1, 0.4, 1000), np.linspace(-1, 0.3, 1000), np.linspace(-1, 0.2, 20))
+    assert s["support"] and all(s["support_by_null"].values()) and s["p"]["rewire"] == 1 / 21
+    s2 = h1_support(0.5, np.linspace(-1, 0.4, 1000), np.linspace(-1, 0.3, 1000), np.array([0.0] * 19 + [0.6]))   # beats perm & random but not ALL rewires
+    assert not s2["support"] and not s2["support_by_null"]["rewire"] and s2["support_by_null"]["permutation"]
