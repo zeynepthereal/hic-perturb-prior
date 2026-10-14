@@ -2,3 +2,16 @@ data/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# large/binary artifacts must never be committed
+*.h5ad
+*.zip
+*.hic
+*.mcool
+*.cool
+*.npz
+*.npy
+*.pairs.gz
+*.chain.gz
+.pytest_cache/
+.benchmarks/
