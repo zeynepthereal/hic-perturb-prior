@@ -1,0 +1,36 @@
+{
+ "git_commit": "376739bd8b39d9adabba32a95e87bc533038a7e3",
+ "git_dirty": true,
+ "sources": {
+  "hic": "ENCODE ENCFF616PUW (md5 d4b999471d4c17a74f1e66370c0012e3, remote read)",
+  "annotation": "GENCODE v44 md5 fc4731226d2d315e6b2415fd1690403d",
+  "gears_h5ad_zip": "md5 84eed779531de88f83d3eb16a773a261"
+ },
+ "sha256": {
+  "data/hic/graphs/b500_hic_cis.npz": "889bda0f94c08587b2952bb2aefef7c96bd8ebde0fc1e4d5a7709475133ca0e2",
+  "data/hic/graphs/b500_hic_cis_spectral.npz": "25acb1a066770050177582f429e8825e7f7ed6724bdea8440875a4ba01a76856",
+  "data/hic/graphs/b500_hic_trans.npz": "98ecc817077358d57601b9059f460ed227e64d754372ae097a385f59b571304c",
+  "data/hic/graphs/b500_hic_trans_spectral.npz": "f526462955cf0c2d8ca791af8e5c903a07e139c468b76fb421812f19cf97c72e",
+  "data/hic/graphs/b500_lin_cis.npz": "cdafc4c696094b8b6673849d644ec3827d434369c2e0d0ad0b80ff064f56e6a0",
+  "data/hic/graphs/b500_lin_cis_spectral.npz": "37f9d40360d417760146a430c8038622c653fd019fbc024a10c7fac08835bb19",
+  "data/hic/graphs/b500_lin_trans.npz": "bc02aaab875e2fad5bcec55b67f3ccf8eb14d80e31bdc9109ed13385f7636ea5",
+  "data/hic/graphs/b500_lin_trans_spectral.npz": "bde592da7dba7b00e9304e313670becddeed185d6730252faa4a4bfdab503d02",
+  "data/hic/graphs/b250_hic_cis.npz": "9805ef50c67659141483a615267a6643d192d35d2a1915a84c203070a1e22f53",
+  "data/hic/graphs/b250_hic_cis_spectral.npz": "d8ad1016aca4a08fe639b476f300aed5a53e7d47e6bb8580a9fb87d4f6fc0878",
+  "data/hic/graphs/b250_hic_trans.npz": "8693fce3bc363acf83d3fe1b50fbe8a2aa7ca0ab74c0f58d91aa5350a4fb9030",
+  "data/hic/graphs/b250_hic_trans_spectral.npz": "509ca80d7dae9e63b720a04e0b556bb11dbfa4150e3da68d0fae2dcd63ced16d",
+  "data/hic/graphs/b250_lin_cis.npz": "cf24788616c370a20712aa67f396d4d1b45be9d9a2da254ccd7cd56a77e612c7",
+  "data/hic/graphs/b250_lin_cis_spectral.npz": "53da78b8954e3bc23986d5c730f6bc8899c7560845a103a2395956ff86527fd9",
+  "data/hic/graphs/b250_lin_trans.npz": "f8d4ee9504d4941f45e2729db755b46128807e4c0eeb25f818f689301b32681c",
+  "data/hic/graphs/b250_lin_trans_spectral.npz": "50b3f042dd24e5a0bbdf7a36d25bf8194d9af8f2d5a3b3741dde78fbfece8bb6",
+  "configs/splits/gears_k562_seed1.json": "ffdb9b18afc5dc802dd3cd17cc4083041c224ea8f930e162e7670c81966ef046",
+  "configs/splits/gears_k562_seed2.json": "2bbe2bd5dbe46e9c4c32881a835f2a0615f1b401732945ca49f17ee953429fae",
+  "configs/splits/gears_k562_seed3.json": "86d31a4b7924ac8b698844e215b6ec0ac68095261f8dca9cbbd447c5a8f8ee4e",
+  "configs/splits/gears_k562_seed4.json": "a482f5396d396265650a459b5e833b6ccd07e40bfc9da750bbe55783b208c0f9",
+  "configs/splits/gears_k562_seed5.json": "55cd95b7631910f2f3a9c4c3bff2bf7ccdf3deeb28e61fa77ac6579e635bd3b6",
+  "results/hic/gene_table.csv": "d3eb5637986ed3e78bbac1a0eda9c77cc08f84882f6e60e840113b4f62f5ab4e",
+  "results/hic/symbol_map.csv": "f74bf94c1df35a43b71dc6ee815410a8e3d38d8cf160c802e7d488bd7607618c",
+  "data/processed/k562_gears.npz": "35754a308283dbf154f3ded746502d6b6a606c59d0adb4c69ea5bf7f53a92973",
+  "configs/k562_gears_hic_primary.yaml": "ff9f434b753795e2aad97e125264fb329245037c18298328d45a128e2537cc9b"
+ }
+}

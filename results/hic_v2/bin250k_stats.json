@@ -1,0 +1,62 @@
+{
+  "res": 250000,
+  "cfg": {
+    "k_cis": 10,
+    "k_trans": 10,
+    "clip_q": 0.999,
+    "min_pairs": 20,
+    "ice_iters": 200,
+    "ice_tol": 1e-05,
+    "d0_lin": 5000000,
+    "knn_mode": "capped_union",
+    "deg_cap": 20
+  },
+  "n_bins": 12137,
+  "valid_bins": 11775,
+  "m_trans": 4.384291119909948,
+  "trans_only_edges": 41705,
+  "hic_trans": {
+    "nodes_embedded": 11775,
+    "isolated": 362,
+    "edges": 80129,
+    "components": 1,
+    "largest_component": 11775,
+    "median_degree": 11.0,
+    "mean_degree": 13.610021231422506,
+    "max_degree": 408,
+    "mean_weight": 1.0
+  },
+  "hic_cis": {
+    "nodes_embedded": 11775,
+    "isolated": 362,
+    "edges": 38424,
+    "components": 23,
+    "largest_component": 989,
+    "median_degree": 4.0,
+    "mean_degree": 6.526369426751592,
+    "max_degree": 405,
+    "mean_weight": 0.9999999999999998
+  },
+  "lin_trans": {
+    "nodes_embedded": 11775,
+    "isolated": 362,
+    "edges": 101128,
+    "components": 1,
+    "largest_component": 11775,
+    "median_degree": 16.0,
+    "mean_degree": 17.176730360934183,
+    "max_degree": 37,
+    "mean_weight": 1.0
+  },
+  "lin_cis": {
+    "nodes_embedded": 11775,
+    "isolated": 362,
+    "edges": 59423,
+    "components": 23,
+    "largest_component": 989,
+    "median_degree": 10.0,
+    "mean_degree": 10.09307855626327,
+    "max_degree": 17,
+    "mean_weight": 1.0000000000000002
+  }
+}

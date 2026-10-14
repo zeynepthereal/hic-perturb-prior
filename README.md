@@ -83,6 +83,24 @@ Pipeline: `scripts/build_gene_table.py` -> `scripts/fetch_hic.py cis|trans` -> `
   - hic_cis vs linear_distance edges: Jaccard 0.14 (23% of hic_cis edges also in the control); Spearman(O/E, -distance) = 0.06 over all 1.06M candidate pairs (decay removed), 0.016 on shared edge weights.
   - predictable GEARS perturbations: PCA 412/1092 (about 103/273 per test split); every Hi-C variant 1092/1092 (273/273 per split) -> extended eval sets ~2.6x larger.
 
+## Week 2 part 2: bin-level whole-genome graphs, factorial controls, pre-registration draft
+Supersedes the gene-level `hic_cis_trans` / `linear_distance` graphs of part 1 (random trans gene picks, 10 Mb cis band); `hic_cis` is kept as `hic_local25k`.
+Pipeline: `scripts/fetch_hic.py trans 500000|250000` (all chromosome pairs, full cis range; remote read) -> `scripts/build_bin_graphs.py 500000|250000`
+-> `scripts/diagnose_hic_v2.py`; outputs in `results/hic_v2/` (`diagnostics.md`, `structure.csv`, `r2_chrom_position.csv`, `ab_correlation.csv`, `ab_*k.csv`, `figs/`, `MANIFEST.json`).
+- **Traffic**: 500 kb all-pairs ~16.3 M records (read earlier); 250 kb all-pairs 55.4 M records, **192 MB** (estimate before fetching: 0.3-0.75 GB). No local copy of the .hic.
+- **Bin-level graph** (`src/hic/bins.py`): genome-wide ICE (cooler-style low-coverage filter), cis O/E by diagonal (per chromosome, far diagonals with < 20 pairs use the plateau),
+  trans O/E by the global trans mean; nodes = valid bins; a gene takes the embedding of its TSS bin. Sparsification (same for all cells): kNN k=10 (union, each node keeps at most 20 edges)
+  U per-chromosome maximum spanning forest (cis); kNN k=10 (trans). Union/mutual kNN were tried first: plain union gives hubs of degree 2,428, mutual kNN is far too sparse for Hi-C.
+- **Factorial cells**: `b500_hic_trans`, `b500_hic_cis`, `b500_lin_trans`, `b500_lin_cis` (linear control = chain per chromosome, weight exp(-d/5 Mb)); also `b250_*`. All cells share the node set;
+  the cis-only cells have exactly 23 components, the trans cells 1.
+- **Nulls / variants** (names for `eval.embeddings`): `<cell>:perm:<seed>`, `<cell>:rewire:<seed>`, `<cell>:random:<seed>`, `<cell>:resid` (chromosome + spline position regressed out).
+- **A/B compartments**: PC1 of the per-chromosome O/E correlation matrix oriented by gene density. In this rearranged K562 map PC1 does not track gene density (median r 0.02; best of PC1-3: |r| 0.46 at 500 kb),
+  so both PC1 and best-of-3 are reported; robustness variants (clipping, log, amplified-bin exclusion) did not change this.
+- **Diagnostic headline** (500 kb, first 10 dims, R² on chromosome + position spline): hic_trans 0.69, hic_cis 0.49, lin_trans 0.74, lin_cis 0.997, local25k 0.91, random 0.03.
+  A/B signal beyond position (best-of-3, 10 / 50 dims): hic_trans 0.16 / 0.63, lin_trans 0.09 / 0.29, hic_cis 0.03 / 0.30, lin_cis 0.004 / 0.03.
+  The control `lin_cis` is localized (62 % of nodes non-zero in its first 10 dims). Details and open decisions in `PREREGISTRATION.md` (DRAFT, not frozen; no Hi-C model has been run).
+- `src/stats.py`: paired per-perturbation comparison + sign-flip permutation test for the pre-registered primary analysis (tested). `configs/k562_gears_hic_primary.yaml`: primary run config, **not to be run before freeze**.
+
 ## Primary config and caveats
 `configs/k562_gears.yaml` is the primary benchmark (directly comparable to the literature). Caveats to carry into every comparison:
 (1) absolute L2 is ~4-6% above the paper's (Pearson and linear/mean ratios match); (2) the paper's own train/test splits are not recoverable
