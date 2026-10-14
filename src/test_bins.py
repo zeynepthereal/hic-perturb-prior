@@ -39,3 +39,18 @@ def test_residualize_removes_position_signal():
     assert r2_columns(E, X)[0] > 0.95            # first column is positional
     assert r2_columns(R, X).max() < 1e-6          # residual has no chromosome/position content
     assert np.allclose(np.sqrt((R ** 2).mean(0)), 1)
+
+
+def test_rewire_trans_preserves_degrees_weights_and_stays_trans():
+    from .hic.bins import rewire_trans
+    rng = np.random.RandomState(0)
+    n, chr_idx = 120, np.repeat(np.arange(6), 20)
+    iu = np.triu_indices(n, 1)
+    keep = (chr_idx[iu[0]] != chr_idx[iu[1]]) & (rng.rand(len(iu[0])) < 0.05)
+    T = sp.csr_matrix((rng.rand(keep.sum()) + 0.5, (iu[0][keep], iu[1][keep])), shape=(n, n)); T = T + T.T
+    R = rewire_trans(T, chr_idx, seed=1)
+    assert (np.diff(R.indptr) == np.diff(T.indptr)).all() and R.diagonal().sum() == 0
+    assert np.allclose(np.sort(sp.triu(R, 1).data), np.sort(sp.triu(T, 1).data))
+    r, c = R.nonzero()
+    assert (chr_idx[r] != chr_idx[c]).all()                    # still purely inter-chromosomal
+    assert (R != T).nnz > 0.5 * T.nnz                          # genuinely randomized

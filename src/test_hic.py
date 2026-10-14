@@ -55,3 +55,23 @@ def test_topk_and_union():
     D = topk_rows(W, 1)
     S = symmetrize_union(D)
     assert S[0, 1] == 3 and S[2, 3] == 5 and S[0, 2] == 0 and (S != S.T).nnz == 0
+
+
+def test_percomp_allocation_and_matrix():
+    from .hic.spectral import allocate_modes, component_modes, percomp_matrix
+    sizes, avail = np.array([300, 100, 50, 20]), np.array([50, 50, 49, 19])
+    m = allocate_modes(sizes, 10, avail)
+    assert m.sum() == 10 and m[0] >= m[1] >= m[2] and (m <= avail).all()
+    assert (allocate_modes(sizes, 8, avail) >= 1).all()                                # K >= #components -> every component represented
+    # two rings (30 nodes) + one chain (10 nodes): modes live only on their own component
+    def ring(n, off, close=True):
+        a = np.arange(n) + off; b = (np.arange(n) + 1) % n + off if close else np.arange(n) + off + 1
+        return (a, b) if close else (a[:-1], b[:-1])
+    (a1, b1), (a2, b2), (a3, b3) = ring(30, 0), ring(30, 30), ring(10, 60, close=False)
+    a, b = np.concatenate([a1, a2, a3]), np.concatenate([b1, b2, b3])
+    W = sp.csr_matrix((np.ones(len(a)), (a, b)), shape=(70, 70)); W = W + W.T
+    cm = component_modes(W, m_max=6)
+    E = percomp_matrix(cm["modes"], cm["component"], cm["sizes"], cm["avail"], 6)
+    assert E.shape == (70, 6) and not np.isnan(E).any()
+    assert np.all(E[:30][:, np.abs(E[:30]).sum(0) > 0].shape[1] >= 1)
+    assert (np.abs(E[60:]).sum(1) > 0).all()                                            # the small chain still gets a non-zero row

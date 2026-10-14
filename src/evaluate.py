@@ -12,6 +12,10 @@ from .utils import REPO_ROOT, set_seed
 
 
 
+def fixed_name(emb: str, K: int, lam: float) -> str:
+    return f"linear[{emb}] (fixed K={K}, lam={lam})"
+
+
 def lm_name(emb: str, tuned: bool) -> str:
     return f"linear[{emb}] ({'val-tuned' if tuned else 'paper hp K=10, lam=0.1'})"
 
@@ -98,11 +102,15 @@ def run_split(ds: PerturbationDataset, cfg: dict, split: dict, label, seed: int)
     obs = ds.delta[te]
     preds = {"no_change": NoChange().fit(ds.delta[fit_idx]).predict(len(te)),
              "mean": MeanBaseline().fit(ds.delta[fit_idx]).predict(len(te))}
-    ok, info, grids = {}, {"split": label, "n_train": len(tr), "n_val": len(va), "n_test": len(te)}, []
+    ok, info, grids, emb_models = {}, {"split": label, "n_train": len(tr), "n_val": len(va), "n_test": len(te)}, [], {}
     for emb in embs:
         K, lam, grid = select_hparams(ds, split, e["K_grid"], e["lambda_grid"], emb, excl)
         preds[lm_name(emb, False)] = fit_predict_linear(ds, fit_idx, te, e["paper_K"], e["paper_lambda"], emb)
         preds[lm_name(emb, True)] = fit_predict_linear(ds, fit_idx, te, K, lam, emb)
+        emb_models[emb] = [lm_name(emb, False), lm_name(emb, True)]
+        for K2, lam2 in e.get("extra_fixed_hp", []):                  # e.g. [[20, 0.1], [50, 0.1]]: fixed (not tuned) secondary settings
+            preds[fixed_name(emb, K2, lam2)] = fit_predict_linear(ds, fit_idx, te, K2, lam2, emb)
+            emb_models[emb].append(fixed_name(emb, K2, lam2))
         ok[emb] = EMBEDDINGS[emb].predictable(ds)[te]
         info[f"{emb}_K"], info[f"{emb}_lambda"] = K, lam
         grids.append(grid)
@@ -110,7 +118,7 @@ def run_split(ds: PerturbationDataset, cfg: dict, split: dict, label, seed: int)
     sets = {"common": (common, list(preds))}
     for emb in embs:
         if (ok[emb] != common).any():
-            sets[f"extended:{emb}"] = (ok[emb], ["mean", lm_name(emb, False), lm_name(emb, True)])
+            sets[f"extended:{emb}"] = (ok[emb], ["mean"] + emb_models[emb])
     for set_name, path in (e.get("extra_eval_sets") or {}).items():   # restrict `common` to a named perturbation list
         names = set(pd.read_csv(REPO_ROOT / path)["perturbation"])
         sets[set_name] = (common & np.isin(ds.perts[te], list(names)), list(preds))

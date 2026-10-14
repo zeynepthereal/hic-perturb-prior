@@ -69,3 +69,65 @@ def spectral_embedding(W: sp.spmatrix, k_max: int = 50):
                 trivial_eigvals=np.zeros(ncomp), embedded=keep, component=component, n_isolated=int((~keep).sum()),
                 all_eigvals=np.concatenate([np.zeros(ncomp), lam_sel]),
                 source_component=np.array([t[1] for t in chosen]))
+
+
+def component_modes(W: sp.spmatrix, m_max: int = 50):
+    """Per-component spectral modes (for the secondary 'percomp' embedding of disconnected graphs): for every connected component its first
+    `m_max` non-trivial eigenvectors of the normalized Laplacian, each scaled to unit RMS over that component's nodes.
+    Returns dict(modes (n, m_max) [0 outside a node's own component / unavailable modes], component (n, -1 = isolated), avail (ncomp,),
+    lam (ncomp, m_max), sizes (ncomp,), embedded (bool n))."""
+    W = sp.csr_matrix(W, dtype=np.float64)
+    n = W.shape[0]
+    deg = np.asarray(W.sum(1)).ravel()
+    keep = deg > 0
+    idx = np.where(keep)[0]
+    Wk = W[idx][:, idx]
+    ncomp, lab = connected_components(Wk, directed=False)
+    modes = np.zeros((n, m_max)); lam = np.full((ncomp, m_max), np.nan); avail = np.zeros(ncomp, dtype=int)
+    sizes = np.bincount(lab, minlength=ncomp)
+    for c in range(ncomp):
+        mem = np.where(lab == c)[0]
+        if len(mem) < 2:
+            continue
+        k = min(m_max, len(mem) - 1) if len(mem) <= DENSE_MAX else m_max
+        l, v = _component_eigs(Wk[mem][:, mem], k)
+        v = v / np.maximum(np.sqrt((v ** 2).mean(0, keepdims=True)), 1e-12)
+        modes[idx[mem], : v.shape[1]] = v
+        lam[c, : len(l)] = l; avail[c] = v.shape[1]
+    component = np.full(n, -1); component[idx] = lab
+    return dict(modes=modes, component=component, avail=avail, lam=lam, sizes=sizes, embedded=keep)
+
+
+def allocate_modes(sizes: np.ndarray, K: int, avail: np.ndarray) -> np.ndarray:
+    """Number of modes per component: proportional to component size (largest remainder), at least 1 per component when K >= #components,
+    never more than the modes available, summing to K whenever possible."""
+    sizes = np.asarray(sizes, float)
+    quota = K * sizes / sizes.sum()
+    m = np.floor(quota).astype(int)
+    if K >= len(sizes):
+        m = np.maximum(m, 1)
+    m = np.minimum(m, avail)
+    while m.sum() > K:                                   # only possible through the >=1 rule; trim the largest allocations
+        j = int(np.argmax(np.where(m > 1, m, -1)))
+        m[j] -= 1
+    while m.sum() < K:
+        room = np.where(m < avail, quota - m, -np.inf)
+        if not np.isfinite(room).any():
+            break
+        m[int(np.argmax(room))] += 1
+    return m
+
+
+def percomp_matrix(modes: np.ndarray, component: np.ndarray, sizes: np.ndarray, avail: np.ndarray, K: int) -> np.ndarray:
+    """(n, K) embedding: component c owns m_c consecutive columns holding its first m_c modes; zero elsewhere. NaN for isolated nodes."""
+    m = allocate_modes(sizes, K, avail)
+    E = np.full((len(component), K), np.nan)
+    ok = component >= 0
+    E[ok] = 0.0
+    off = 0
+    for c, mc in enumerate(m):
+        if mc:
+            sel = component == c
+            E[np.ix_(sel, np.arange(off, off + mc))] = modes[sel][:, :mc]
+        off += mc
+    return E

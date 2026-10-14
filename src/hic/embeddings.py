@@ -5,10 +5,13 @@ All classes keep G = PCA of the training expression pseudobulks (identical to `t
 be a read-out gene -> larger `extended:<emb>` eval sets.
 
 Graph names
-  b<res>_<cis>_<trans>   bin-level whole-genome graphs, e.g. b500_hic_trans (primary Hi-C), b500_hic_cis, b500_lin_trans, b500_lin_cis
-                         (primary control). A gene gets the embedding of its TSS bin; genes in one bin share it.
+  b<res>_<cis>_<trans>   bin-level whole-genome graphs: cis in {hic, lin}, trans in {trans (Hi-C), cis (= none), randtrans_s<seed> (random trans edges
+                         matched to the Hi-C trans graph in count and degree sequence)}; e.g. b500_hic_trans (primary Hi-C),
+                         b500_lin_randtrans_s0..s9 (primary controls, averaged over seeds in the analysis). b500x_* = rearranged regions excluded.
+                         A gene gets the embedding of its TSS bin; genes in one bin share it.
   hic_local25k           gene-level 25 kb local-cis graph (band <= 10 Mb), the earlier 'hic_cis'
 Suffixes
+  :percomp               (cis-only graphs) top eigenvectors chosen PER CONNECTED COMPONENT, number allocated proportionally to component size
   :resid                 embedding residualized on chromosome + per-chromosome spline of position (secondary analysis), columns re-scaled
   :perm:<seed>           gene_label_permutation: same graph, which gene sits on which (embedded) node is permuted
   :rewire:<seed>         degree_preserving_rewire of the graph, re-embedded (built lazily, cached)
@@ -29,11 +32,11 @@ from ..baselines import Embedding, pca_gene_embedding
 from .bins import Genome
 from .genes import HIC_CHROMS
 from .position import residualize
-from .spectral import spectral_embedding
+from .spectral import percomp_matrix, spectral_embedding
 
 ROOT = Path(__file__).resolve().parents[2]
 ART, TABLES = ROOT / "data" / "hic" / "graphs", ROOT / "results" / "hic"
-BASE_RE = re.compile(r"^(hic_local25k|b\d+_(hic|lin)_(trans|cis))$")
+BASE_RE = re.compile(r"^(hic_local25k|b\d+x?_(hic|lin)_(trans|cis|randtrans_s\d+))$")
 
 
 @lru_cache(maxsize=None)
@@ -77,10 +80,11 @@ def double_edge_swap(W: sp.csr_matrix, n_swap_factor: int = 10, seed: int = 0) -
 
 
 class GraphSpectralEmbedding(Embedding):
-    def __init__(self, base: str, null: str | None = None, seed: int = 0, resid: bool = False):
+    def __init__(self, base: str, null: str | None = None, seed: int = 0, resid: bool = False, percomp: bool = False):
         assert BASE_RE.match(base), base
-        self.base, self.null, self.seed, self.resid = base, null, seed, resid
-        self.name = base + (f":{null}:{seed}" if null else "") + (":resid" if resid else "")
+        assert not (percomp and (null or resid)), "percomp is a stand-alone variant"
+        self.base, self.null, self.seed, self.resid, self.percomp = base, null, seed, resid, percomp
+        self.name = base + (f":{null}:{seed}" if null else "") + (":resid" if resid else "") + (":percomp" if percomp else "")
 
     # ---- node level
     def _artifact(self) -> str:
@@ -98,7 +102,10 @@ class GraphSpectralEmbedding(Embedding):
                                 **{k: meta[k] for k in ("node_chr", "node_pos", "valid", "res", "level") if k in meta})
         return nm
 
-    def _node_matrix(self):
+    def _node_matrix(self, K: int = 50):
+        if self.percomp:
+            pc = np.load(ART / f"{self.base}_percomp.npz")
+            return percomp_matrix(pc["modes"], pc["component"], pc["sizes"], pc["avail"], K), pc["embedded"].astype(bool)
         z = load_spectral(self._artifact())
         E, ok = z["emb"].copy(), z["embedded"].astype(bool)
         if self.null == "random":
@@ -139,23 +146,27 @@ class GraphSpectralEmbedding(Embedding):
     def predictable(self, ds):
         return self._node_index(ds) >= 0
 
-    def fit(self, Y_train, train_idx, ds, K):
-        G = pca_gene_embedding(Y_train + ds.ctrl_mean, K)          # identical G to `train_pca_expr`
-        E, _ = self._node_matrix()
+    def perturbation_matrix(self, ds, K: int) -> np.ndarray:
+        """P rows for every dataset perturbation (NaN rows = not predictable)."""
+        E, _ = self._node_matrix(K)
         idx = self._node_index(ds)
         P = np.full((len(ds.perts), K), np.nan)
         P[idx >= 0] = E[idx[idx >= 0], :K]
-        return G, P
+        return P
+
+    def fit(self, Y_train, train_idx, ds, K):
+        G = pca_gene_embedding(Y_train + ds.ctrl_mean, K)          # identical G to `train_pca_expr`
+        return G, self.perturbation_matrix(ds, K)
 
 
 def make_embedding(name: str) -> Embedding:
     parts = name.split(":")
-    resid = parts[-1] == "resid"
-    if resid:
+    resid, percomp = parts[-1] == "resid", parts[-1] == "percomp"
+    if resid or percomp:
         parts = parts[:-1]
     base = parts[0]
     null = parts[1] if len(parts) > 1 else None
     seed = int(parts[2]) if len(parts) > 2 else 0
     if null not in (None, "perm", "rewire", "random"):
         raise KeyError(name)
-    return GraphSpectralEmbedding(base, null, seed, resid)
+    return GraphSpectralEmbedding(base, null, seed, resid, percomp)

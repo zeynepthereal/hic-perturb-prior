@@ -70,8 +70,9 @@ def test_unpredictable_perts_get_nan_and_eval_sets():
     ok = ds.target_idx[80:] >= 0
     assert np.isnan(pred[~ok]).all() and not np.isnan(pred[ok]).any()
     cfg = {"eval": {"embeddings": ["train_pca_expr"], "exclude_target_primary": True, "K_grid": [2, 5], "lambda_grid": [0.1],
-                    "paper_K": 5, "paper_lambda": 0.1, "n_top_de": 5, "n_top_expr": 10}}
+                    "paper_K": 5, "paper_lambda": 0.1, "n_top_de": 5, "n_top_expr": 10, "extra_fixed_hp": [[3, 0.1]]}}
     split = {"train": idx[:80], "val": idx[80:100], "test": idx[100:]}
     per, info, _ = run_split(ds, cfg, split, "s", 0)
     assert set(per.eval_set) == {"common"} and info["n_eval_common"] == int((ds.target_idx[100:] >= 0).sum())
     assert not per.l2.isna().any()
+    assert "linear[train_pca_expr] (fixed K=3, lam=0.1)" in set(per.model)

@@ -1,0 +1,50 @@
+# PRE-REGISTERED (H1 primary: b500_hic_trans vs the 10 matched random-trans control seeds, K=10 lambda=0.1; K=50 fixed = KEY secondary). DO NOT RUN before the pre-registration is frozen.
+name: prereg_primary
+data:
+  source: gears
+  raw_path: data/gears/replogle_k562_essential/perturb_processed.h5ad
+  processed_path: data/processed/k562_gears.npz
+  qc_path: results/qc_perturbations_gears.csv
+  pert_col: condition
+  control_label: ctrl
+eval:
+  seeds: []
+  split_fracs:
+  - 0.7
+  - 0.1
+  - 0.2
+  split_files:
+    gears_seed1: configs/splits/gears_k562_seed1.json
+    gears_seed2: configs/splits/gears_k562_seed2.json
+    gears_seed3: configs/splits/gears_k562_seed3.json
+    gears_seed4: configs/splits/gears_k562_seed4.json
+    gears_seed5: configs/splits/gears_k562_seed5.json
+  embeddings:
+  - b500_hic_trans
+  - b500_lin_randtrans_s0
+  - b500_lin_randtrans_s1
+  - b500_lin_randtrans_s2
+  - b500_lin_randtrans_s3
+  - b500_lin_randtrans_s4
+  - b500_lin_randtrans_s5
+  - b500_lin_randtrans_s6
+  - b500_lin_randtrans_s7
+  - b500_lin_randtrans_s8
+  - b500_lin_randtrans_s9
+  refit_trainval: false
+  paper_K: 10
+  paper_lambda: 0.1
+  K_grid:
+  - 10
+  - 20
+  - 50
+  lambda_grid:
+  - 0.1
+  extra_fixed_hp:
+  - - 20
+    - 0.1
+  - - 50
+    - 0.1
+  n_top_de: 20
+  n_top_expr: 1000
+  exclude_target_primary: true

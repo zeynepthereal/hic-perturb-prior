@@ -241,3 +241,31 @@ def build_cells(OE: np.ndarray, valid: np.ndarray, G: Genome, cfg=BIN_CFG) -> di
     del Wt
     return {"hic_trans": (out["hic"] + T).tocsr(), "hic_cis": out["hic"], "lin_trans": (out["lin"] + T).tocsr(), "lin_cis": out["lin"],
             "_trans_only": T}
+
+
+def rewire_trans(T: sp.csr_matrix, chr_idx: np.ndarray, seed: int, factor: int = 10) -> sp.csr_matrix:
+    """Matched random trans graph: degree-preserving double-edge swaps of the (already sparsified) trans graph `T`, constrained so that
+    every edge stays inter-chromosomal. Per-node trans degrees, the number of edges and the multiset of weights are preserved exactly;
+    which bins are connected is randomized (`factor` swap attempts per edge)."""
+    rng = np.random.RandomState(seed)
+    U = sp.triu(T, 1).tocoo()
+    a, b, w = U.row.copy(), U.col.copy(), U.data.copy()
+    m = len(a)
+    edges = set(zip(a.tolist(), b.tolist()))
+    key = lambda x, y: (x, y) if x < y else (y, x)
+    for _ in range(factor * m):
+        e1, e2 = rng.randint(m, size=2)
+        if e1 == e2:
+            continue
+        p, q, r, s = a[e1], b[e1], a[e2], b[e2]
+        if rng.rand() < 0.5:
+            r, s = s, r
+        if len({p, q, r, s}) < 4 or chr_idx[p] == chr_idx[s] or chr_idx[r] == chr_idx[q]:
+            continue
+        n1, n2 = key(p, s), key(r, q)
+        if n1 in edges or n2 in edges:
+            continue
+        edges.discard(key(p, q)); edges.discard(key(r, s)); edges.add(n1); edges.add(n2)
+        a[e1], b[e1] = n1; a[e2], b[e2] = n2
+    R = sp.csr_matrix((w, (a, b)), shape=T.shape)
+    return (R + R.T).tocsr()
