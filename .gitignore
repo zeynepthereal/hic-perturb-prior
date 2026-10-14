@@ -15,3 +15,6 @@ __pycache__/
 *.chain.gz
 .pytest_cache/
 .benchmarks/
+
+# raw per-perturbation metrics of the pre-registered runs are committed gzip-compressed (*.csv.gz); the large raw CSVs stay local
+results/*_prereg_*/per_perturbation_metrics.csv

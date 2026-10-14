@@ -1,0 +1,12 @@
+{
+  "source_file": "/Users/zeynep/Library/Application Support/Claude/scratch-workspaces/3d55d55b-491f-4139-b2b2-251e2dafdb3b/bd0ebe97-def9-4833-869f-e73bb950d1e8/scratch-2026-10-13-4df23a/hic-perturb-prior/data/gears/replogle_k562_essential/perturb_processed.h5ad",
+  "source_md5": "9b3daf64504ca8cc97af9a8d394b3ca6",
+  "source": "GEARS perturb_processed.h5ad",
+  "n_genes": 5000,
+  "n_control_cells": 10691,
+  "n_perts_total": 1092,
+  "n_perts_target_in_readout": 412,
+  "X_integer_valued": false,
+  "X_max": 6.941005229949951,
+  "n_perts_evaluated": 1092
+}

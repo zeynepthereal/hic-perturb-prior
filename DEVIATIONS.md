@@ -45,3 +45,13 @@ OSF registration is **postponed**. The pre-analysis timestamp is instead provide
 - Only the SHA-256 digests were submitted, to the public calendars `a.pool.opentimestamps.org`, `b.pool.opentimestamps.org`, `a.pool.eternitywall.com` and `ots.btc.catallaxy.com`.
 - **Status: pending.** Bitcoin confirmation takes a few hours; run `ots upgrade <file>.ots` later (then commit the upgraded proofs) and verify with `ots verify PREREGISTRATION.md.ots`.
 - **OSF link: to be added later.**
+
+## D5 — Notes on the execution of the pre-registered run (2026-10-14)
+
+None of these changes an analytical choice; they are recorded for completeness.
+
+- **Sanity-check configs.** §7 checks 1 and 5 were run through the registered code path on subsets of the registered arms with two additional, non-registered configs, `configs/sanity/sanity1_pca_only.yaml` (PCA + mean baselines) and `configs/sanity/sanity5_lean_vs_standard.yaml` (two primary arms). They were committed before running (clean tree logged). Check 5 was then confirmed on the full primary run (22 arm×K combinations). No Hi-C vs control contrast was evaluated from the sanity runs.
+- **Order of operations.** Checks 1, 3, 4 and 5 (on the two-arm sanity run) were evaluated and passed before the primary run was started; check 2 (reported, not a gate) is reported after the null run because it needs the null arms.
+- **Storage of large outputs.** `per_perturbation_metrics.csv` of the primary (47.9 MB) and S3 (100.9 MB) runs are committed as `.csv.gz` (round-trip SHA-256 verified); the raw CSVs are git-ignored (`.gitignore`) to respect the 50 MB file limit. `scripts/run_primary_analysis.py` reads the CSV: `gunzip -k` the file first.
+- **Rewired graphs.** The 20 degree-preserving-rewire graphs (and their embeddings) of the S2 null are built lazily from fixed seeds (0–19) at analysis time and are therefore not in the frozen manifest; the SHA-256 of all `*__rewire*` artifacts is recorded in `results/<null run>/rewire_artifacts_sha256.json`.
+- **Results record.** `results/PREREG_ANALYSIS_SUMMARY.md` collects the numbers and the pre-registered labels; per-run details are in each run directory (config, git.json, per-case metrics).

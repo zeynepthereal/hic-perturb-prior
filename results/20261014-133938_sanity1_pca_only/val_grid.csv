@@ -1,0 +1,16 @@
+embedding,K,lambda,val_l2,n_val,split
+train_pca_expr,10,0.1,5.480899611923836,35,gears_seed1
+train_pca_expr,20,0.1,5.43909119686806,35,gears_seed1
+train_pca_expr,50,0.1,5.7308580891604795,35,gears_seed1
+train_pca_expr,10,0.1,5.505200091146199,35,gears_seed2
+train_pca_expr,20,0.1,5.567014928843932,35,gears_seed2
+train_pca_expr,50,0.1,5.916765806948556,35,gears_seed2
+train_pca_expr,10,0.1,5.323287931214234,33,gears_seed3
+train_pca_expr,20,0.1,5.320083335329298,33,gears_seed3
+train_pca_expr,50,0.1,5.5893417341642975,33,gears_seed3
+train_pca_expr,10,0.1,5.606524703401388,23,gears_seed4
+train_pca_expr,20,0.1,5.654775692791445,23,gears_seed4
+train_pca_expr,50,0.1,6.145071234286263,23,gears_seed4
+train_pca_expr,10,0.1,5.171616666804883,36,gears_seed5
+train_pca_expr,20,0.1,5.167568996257563,36,gears_seed5
+train_pca_expr,50,0.1,5.439195821925212,36,gears_seed5

@@ -1,0 +1,35 @@
+name: prereg_s2_nulls
+data:
+  processed_path: data/processed/k562_gears.npz
+hic: b500_hic_trans
+control:
+- b500_lin_randtrans_s0
+- b500_lin_randtrans_s1
+- b500_lin_randtrans_s2
+- b500_lin_randtrans_s3
+- b500_lin_randtrans_s4
+- b500_lin_randtrans_s5
+- b500_lin_randtrans_s6
+- b500_lin_randtrans_s7
+- b500_lin_randtrans_s8
+- b500_lin_randtrans_s9
+K:
+- 10
+- 50
+lambda: 0.1
+nulls:
+  permutation:
+    n: 1000
+  random_gaussian:
+    n: 1000
+  rewire:
+    n: 20
+eval:
+  split_files:
+    gears_seed1: configs/splits/gears_k562_seed1.json
+    gears_seed2: configs/splits/gears_k562_seed2.json
+    gears_seed3: configs/splits/gears_k562_seed3.json
+    gears_seed4: configs/splits/gears_k562_seed4.json
+    gears_seed5: configs/splits/gears_k562_seed5.json
+  metric: L2 top1000 expressed genes, target excluded
+  refit_trainval: false

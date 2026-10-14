@@ -1,0 +1,144 @@
+{
+ "D": -0.009257445551877647,
+ "p_signflip": 0.22629773702262979,
+ "ci95": [
+  -0.02477908710525527,
+  0.004642518903971454
+ ],
+ "n_unique_perts": 837,
+ "n_cases": 1365,
+ "n_splits": 5,
+ "per_split_mean": {
+  "gears_seed1": 0.002053864780310188,
+  "gears_seed2": 0.0030641748716354706,
+  "gears_seed3": -0.0005578663229034112,
+  "gears_seed4": -0.0319999635761723,
+  "gears_seed5": -0.01884743751225819
+ },
+ "per_split_n": {
+  "gears_seed1": 273,
+  "gears_seed2": 273,
+  "gears_seed3": 273,
+  "gears_seed4": 273,
+  "gears_seed5": 273
+ },
+ "per_split_paired_t_p": {
+  "gears_seed1": 0.8704362127023476,
+  "gears_seed2": 0.7923097088695625,
+  "gears_seed3": 0.9545115891864032,
+  "gears_seed4": 0.029896452306558383,
+  "gears_seed5": 0.143632686014994
+ },
+ "per_split_wilcoxon_p": {
+  "gears_seed1": 0.5633658626377961,
+  "gears_seed2": 0.521252076456462,
+  "gears_seed3": 0.21457132971574067,
+  "gears_seed4": 0.11667456060269434,
+  "gears_seed5": 0.5837053906987505
+ },
+ "frac_perts_new_better": 0.48984468339307047,
+ "delta": 0.021253730423773418,
+ "p_lower": 0.054909450905490945,
+ "p_upper": 9.99990000099999e-06,
+ "p_tost": 0.054909450905490945,
+ "equivalent": false,
+ "control_mean": 4.250746084754684,
+ "decision": "INCONCLUSIVE",
+ "seed_ranks_descriptive": {
+  "per_split": {
+   "gears_seed1": {
+    "hic": 4.225703636541951,
+    "control_mean": 4.227757501322261,
+    "control_min": 4.220656580937158,
+    "control_max": 4.23413728067483,
+    "rank": 5,
+    "n_controls_beaten": 6,
+    "n_controls": 10
+   },
+   "gears_seed2": {
+    "hic": 4.254704299695452,
+    "control_mean": 4.257768474567087,
+    "control_min": 4.249999275315691,
+    "control_max": 4.2675853270715045,
+    "rank": 5,
+    "n_controls_beaten": 6,
+    "n_controls": 10
+   },
+   "gears_seed3": {
+    "hic": 4.367067687143877,
+    "control_mean": 4.366509820820974,
+    "control_min": 4.3624269507803675,
+    "control_max": 4.375772307511713,
+    "rank": 8,
+    "n_controls_beaten": 3,
+    "n_controls": 10
+   },
+   "gears_seed4": {
+    "hic": 4.224846897354937,
+    "control_mean": 4.192846933778764,
+    "control_min": 4.187514249416327,
+    "control_max": 4.203129313552753,
+    "rank": 11,
+    "n_controls_beaten": 0,
+    "n_controls": 10
+   },
+   "gears_seed5": {
+    "hic": 4.2276951307965875,
+    "control_mean": 4.208847693284328,
+    "control_min": 4.203377527085326,
+    "control_max": 4.218719146720001,
+    "rank": 11,
+    "n_controls_beaten": 0,
+    "n_controls": 10
+   }
+  },
+  "pooled": {
+   "hic": 4.260003530306561,
+   "control_mean": 4.250746084754683,
+   "control_min": 4.247840530138538,
+   "control_max": 4.253830237622846,
+   "rank": 11,
+   "n_controls_beaten": 0,
+   "n_controls": 10
+  },
+  "n_cases": 1365
+ },
+ "cli": {
+  "args": {
+   "run_dir": "results/20261014-135031_prereg_s3_resid",
+   "hic": "b500_hic_trans:resid",
+   "control": null,
+   "control_template": "b500_lin_randtrans_s{k}:resid",
+   "n_control": 10,
+   "kind": "paper",
+   "K": 10,
+   "lam": 0.1,
+   "eval_set": "common",
+   "target": "excluded",
+   "subset": "top1000_expr",
+   "metric": "l2",
+   "n_perm": 100000,
+   "seed": 0,
+   "nulls": null,
+   "tier2_from": null,
+   "out": null
+  },
+  "hic_model": "linear[b500_hic_trans:resid] (paper hp K=10, lam=0.1)",
+  "control_models": [
+   "linear[b500_lin_randtrans_s0:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s1:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s2:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s3:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s4:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s5:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s6:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s7:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s8:resid] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s9:resid] (paper hp K=10, lam=0.1)"
+  ],
+  "git": {
+   "commit": "fd3da67621befe4fc8ead49ea4c963ed6a98acc2",
+   "dirty": false
+  }
+ }
+}

@@ -1,0 +1,173 @@
+{
+ "D": 0.04111890395168806,
+ "p_signflip": 0.021719782802171978,
+ "ci95": [
+  0.0075424924507179894,
+  0.08465589049470945
+ ],
+ "n_unique_perts": 837,
+ "n_cases": 1365,
+ "n_splits": 5,
+ "per_split_mean": {
+  "gears_seed1": 0.1504934589078018,
+  "gears_seed2": 0.051467155711321926,
+  "gears_seed3": 0.01974026945149516,
+  "gears_seed4": -0.018784322477197517,
+  "gears_seed5": 0.0026779581650189727
+ },
+ "per_split_n": {
+  "gears_seed1": 273,
+  "gears_seed2": 273,
+  "gears_seed3": 273,
+  "gears_seed4": 273,
+  "gears_seed5": 273
+ },
+ "per_split_paired_t_p": {
+  "gears_seed1": 0.029590724149468263,
+  "gears_seed2": 0.1953803897466705,
+  "gears_seed3": 0.05639642408598485,
+  "gears_seed4": 0.10163456702916737,
+  "gears_seed5": 0.8255954449395614
+ },
+ "per_split_wilcoxon_p": {
+  "gears_seed1": 0.8126281437457545,
+  "gears_seed2": 0.07821821981367695,
+  "gears_seed3": 0.009775692208205754,
+  "gears_seed4": 0.11955792183623472,
+  "gears_seed5": 0.2719245730442963
+ },
+ "frac_perts_new_better": 0.5304659498207885,
+ "delta": 0.021410435875556348,
+ "p_lower": 9.99990000099999e-06,
+ "p_upper": 0.8264117358826412,
+ "p_tost": 0.8264117358826412,
+ "equivalent": false,
+ "control_mean": 4.282087175111269,
+ "decision": "SIGNIFICANT: Hi-C better",
+ "seed_ranks_descriptive": {
+  "per_split": {
+   "gears_seed1": {
+    "hic": 4.230233593777557,
+    "control_mean": 4.380727052685359,
+    "control_min": 4.3017477736326,
+    "control_max": 4.513690890562905,
+    "rank": 1,
+    "n_controls_beaten": 10,
+    "n_controls": 10
+   },
+   "gears_seed2": {
+    "hic": 4.238090442487837,
+    "control_mean": 4.289557598199159,
+    "control_min": 4.267028977571514,
+    "control_max": 4.32115754359392,
+    "rank": 1,
+    "n_controls_beaten": 10,
+    "n_controls": 10
+   },
+   "gears_seed3": {
+    "hic": 4.339399752781573,
+    "control_mean": 4.359140022233069,
+    "control_min": 4.348549400707358,
+    "control_max": 4.376295735725408,
+    "rank": 1,
+    "n_controls_beaten": 10,
+    "n_controls": 10
+   },
+   "gears_seed4": {
+    "hic": 4.2028116710698535,
+    "control_mean": 4.1840273485926565,
+    "control_min": 4.180347211955135,
+    "control_max": 4.188208398850137,
+    "rank": 11,
+    "n_controls_beaten": 0,
+    "n_controls": 10
+   },
+   "gears_seed5": {
+    "hic": 4.194305895681084,
+    "control_mean": 4.1969838538461035,
+    "control_min": 4.191071063619405,
+    "control_max": 4.21043497122769,
+    "rank": 6,
+    "n_controls_beaten": 5,
+    "n_controls": 10
+   }
+  },
+  "pooled": {
+   "hic": 4.240968271159581,
+   "control_mean": 4.28208717511127,
+   "control_min": 4.259016567475032,
+   "control_max": 4.309669282178847,
+   "rank": 1,
+   "n_controls_beaten": 10,
+   "n_controls": 10
+  },
+  "n_cases": 1365
+ },
+ "cli": {
+  "args": {
+   "run_dir": "results/20261014-134117_prereg_primary",
+   "hic": "b500_hic_trans",
+   "control": null,
+   "control_template": "b500_lin_randtrans_s{k}",
+   "n_control": 10,
+   "kind": "paper",
+   "K": 10,
+   "lam": 0.1,
+   "eval_set": "common",
+   "target": "excluded",
+   "subset": "top1000_expr",
+   "metric": "l2",
+   "n_perm": 100000,
+   "seed": 0,
+   "nulls": "results/20261014-134435_prereg_s2_nulls/nulls.json",
+   "tier2_from": "results/20261014-135031_prereg_s3_resid/primary_analysis.json",
+   "out": null
+  },
+  "hic_model": "linear[b500_hic_trans] (paper hp K=10, lam=0.1)",
+  "control_models": [
+   "linear[b500_lin_randtrans_s0] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s1] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s2] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s3] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s4] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s5] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s6] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s7] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s8] (paper hp K=10, lam=0.1)",
+   "linear[b500_lin_randtrans_s9] (paper hp K=10, lam=0.1)"
+  ],
+  "git": {
+   "commit": "fd3da67621befe4fc8ead49ea4c963ed6a98acc2",
+   "dirty": false
+  }
+ },
+ "null_condition": {
+  "K": 10,
+  "D_obs": 0.041118903951688074,
+  "n_cases": 1365,
+  "thresholds": {
+   "permutation_q95": 0.04033200764154769,
+   "random_gaussian_q95": 0.04004224433753783,
+   "rewire_max": 0.03173474128435602
+  },
+  "support_by_null": {
+   "permutation": true,
+   "random_gaussian": true,
+   "rewire": true
+  },
+  "support": true,
+  "p": {
+   "permutation": 0.03696303696303696,
+   "random_gaussian": 0.026973026973026972,
+   "rewire": 0.047619047619047616
+  },
+  "n_null": {
+   "permutation": 1000,
+   "random_gaussian": 1000,
+   "rewire": 20
+  }
+ },
+ "D_diff_nulls_vs_primary": 1.3877787807814457e-17,
+ "tier1_supported": true,
+ "tier2_supported": false
+}
