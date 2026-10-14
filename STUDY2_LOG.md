@@ -3,9 +3,13 @@
 Append-only working log of **Study 2** (K562 discovery → RPE1 confirmation). Study 1 (`prereg-v1`, `PREREGISTRATION.md`, its configs, manifest, `DEVIATIONS.md`) is **closed and untouched**; nothing here modifies it.
 Everything in this file is **exploratory** until a new pre-registration (`prereg-v2`) is frozen. Times are 2026-10-14 local unless stated.
 
+## Decisions
+- **RPE1 is dropped as the confirmation dataset** (owner decision, 2026-10-14). Reasons: (i) its Hi-C is ≈ 30× shallower than K562 (62.5 M vs 1.91 G contacts; median 17.7 k vs 485 k contacts per 500 kb bin; valid-bin fraction 90.7 % vs 96.5–97.0 %); (ii) its Perturb-seq panel is an essential-genes-only screen, the same question/data mismatch as Study 1. The RPE1 Hi-C QC numbers in P1.3 are kept for reference only. Rules 1–2 below that mention RPE1 as the confirmation set are **superseded**: the confirmation design is being revised, and until a revised plan is written nothing is run beyond what is listed under "On hold".
+- **On hold (owner instruction, 2026-10-14):** Phase 2 entirely (no further GEARS run beyond the single split-1 job below); the graph-neighbour model is **not** to be run on real data; the question of how many matched-control seeds GEARS runs should use is **unanswered** until the revised plan.
+
 ## Rules for Study 2
 1. **K562 = discovery data** (exploratory, may be analysed repeatedly). **RPE1 = confirmation data**, to be analysed **once**, under a new frozen pre-registration (`prereg-v2`).
-2. **Until `prereg-v2` is frozen: no RPE1 Perturb-seq data is loaded, inspected or summarised in any way** (the GEARS RPE1 zip is not downloaded). Only the RPE1 *Hi-C* QC gate may be computed (Phase 1, item 3).
+2. *(superseded, see Decisions: RPE1 dropped)* **Until `prereg-v2` is frozen: no RPE1 Perturb-seq data is loaded, inspected or summarised in any way** (the GEARS RPE1 zip is not downloaded). Only the RPE1 *Hi-C* QC gate may be computed (Phase 1, item 3).
 3. **Phase 1 = calibration only: no Hi-C vs control comparison of any kind on real data.** (The graph-neighbour model has only been run on synthetic data; GEARS has been run only with its standard GO graph.)
 4. Model families: (1) the existing linear model; (2) a graph-neighbour model (new, `src/graphnn.py`); (3) GEARS (cell-gears 0.1.2) with its GO graph replaced/combined with the Hi-C graph.
    Information sources per family: standard (PCA / GO), standard + Hi-C, standard + matched control graph, mean baseline.
