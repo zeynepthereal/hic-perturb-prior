@@ -1,7 +1,7 @@
 # Pre-registration — Hi-C as a prior for unseen-perturbation prediction
 
-**Status: DRAFT v0.5 (2026-10-14). Not frozen. No Hi-C perturbation model has been run.**
-To be approved by the project owner; at freeze we regenerate `results/hic_v2/MANIFEST.json` on a clean tree and commit (and tag) before any analysis in §5–§6 is run.
+**Status: FROZEN v1.0 (2026-10-14), tag prereg-v1. No Hi-C perturbation model had been run at freeze.**
+The manifest (`results/hic_v2/MANIFEST.json`) was regenerated on a clean tree at freeze, and the commit was tagged `prereg-v1`.
 
 ### Changes since v0.4
 - **Tier 2 made apples-to-apples (§3, S3):** the Tier-2 test now compares `b500_hic_trans:resid` against **`b500_lin_randtrans:resid`** (all ten control seeds residualized with the identical basis: chromosome + per-chromosome cubic B-spline, 8 df, same column re-scaling), control value = mean of the ten per-seed case-level L2 values exactly as in the primary; same test, α = 0.05 two-sided, K = 10, λ = 0.1, serial gatekeeping after Tier 1. The v0.4 comparison against the *un*residualized control would have been biased against Hi-C whenever position is predictive (that control still carries chromosome/position information, R² 0.55). The residualized control passes the eligibility gate (0 % all-zero rows at K = 10 and 50). `hic_cis:resid` stays exploratory. Nothing else changed.
