@@ -3,7 +3,7 @@
 `PREREGISTRATION.md` is **frozen at git tag `prereg-v1`** and is **never edited again**. Everything that changes after the freeze — tooling, corrections, departures from the registered plan —
 is recorded here, append-only, with date, reason and the commits involved. An entry never retroactively alters what was registered.
 
-**OSF registration link:** (to be added)
+**OSF registration link:** (to be added; registration postponed, see D4)
 
 ---
 
@@ -32,3 +32,16 @@ is recorded here, append-only, with date, reason and the commits involved. An en
 ## D3 — Open items
 
 - OSF registration link: (to be added when the owner has uploaded the frozen `PREREGISTRATION.md`).
+
+## D4 — OSF registration postponed; pre-analysis timestamp by OpenTimestamps (2026-10-14)
+
+OSF registration is **postponed**. The pre-analysis timestamp is instead provided by **OpenTimestamps** (`opentimestamps-client` 0.7.2, `ots stamp`), made at **2026-10-14T20:39:09Z**, before any pre-registered analysis was run.
+
+| file (byte-identical to the file at tag `prereg-v1` = commit `7bb6c399992a06a236b8698c28e51eea2934a8be`) | SHA-256 | proof |
+|---|---|---|
+| `PREREGISTRATION.md` | `d389a4655dbfd07e866e9ee7300b001bb8faacf945f5ac30114aa80bcd09e0ee` | `PREREGISTRATION.md.ots` |
+| `results/hic_v2/MANIFEST.json` | `82421ab7098f6a5e8a1f55c6fc2e522ae9703ac19fd3ff6bd0feab87df3bba09` | `results/hic_v2/MANIFEST.json.ots` |
+
+- Only the SHA-256 digests were submitted, to the public calendars `a.pool.opentimestamps.org`, `b.pool.opentimestamps.org`, `a.pool.eternitywall.com` and `ots.btc.catallaxy.com`.
+- **Status: pending.** Bitcoin confirmation takes a few hours; run `ots upgrade <file>.ots` later (then commit the upgraded proofs) and verify with `ots verify PREREGISTRATION.md.ots`.
+- **OSF link: to be added later.**
