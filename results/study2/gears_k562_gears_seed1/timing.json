@@ -29,5 +29,12 @@
   "val": []
  },
  "t_dataloader_s": 0.0038840770721435547,
- "device_used": "mps"
+ "device_used": "mps",
+ "t_train_s": 76573.0866780281,
+ "t_predict_s": 107.08520579338074,
+ "n_test": 270,
+ "n_test_predicted": 270,
+ "t_total_s": 76705.29415917397,
+ "peak_rss_sampled_GiB": 10.474411010742188,
+ "ru_maxrss_GiB": 11.055206298828125
 }

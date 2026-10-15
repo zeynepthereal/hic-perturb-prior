@@ -1,3 +1,5 @@
 [    18.4s rss   6.0 GiB] PertData loaded (cell graphs built or read from cache): 15s
 [    18.4s rss   6.0 GiB] conditions dropped (not in GEARS GO graph): {'test': ['C14orf178+ctrl', 'RPS10-NUDT3+ctrl', 'FAU+ctrl'], 'train': ['C7orf26+ctrl', 'SEM1+ctrl']}
 [    18.4s rss   6.0 GiB] dataloaders ready 0s {'train_loader': 3508, 'val_loader': 379, 'test_loader': 1184}
+[ 76598.1s rss   2.0 GiB] training finished 76573s
+[ 76705.3s rss   1.9 GiB] DONE {"t_load_pertdata_s": 15.0, "t_dataloader_s": 0.0, "device_used": "mps", "t_train_s": 76573.1, "t_predict_s": 107.1, "n_test": 270, "n_test_predicted": 270, "t_total_s": 76705.3, "peak_rss_sampled_GiB": 10.5, "ru_maxrss_GiB": 11.1}
