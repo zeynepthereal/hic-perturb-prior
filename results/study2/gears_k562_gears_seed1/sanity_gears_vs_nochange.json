@@ -1,0 +1,33 @@
+{
+ "ctrl_mean_max_abs_diff_vs_dataset (GEARS-style ctrl mean vs the control used for L2)": 0.0,
+ "gene_order_identical": true,
+ "corr(mean predicted absolute expression over test perts, ctrl mean)": 0.995476980195208,
+ "n_set_A": 104,
+ "mean L2: GEARS / no_change / mean_baseline(train)": [
+  4.631933851854408,
+  4.6097676841787,
+  4.305057632186633
+ ],
+ "fraction of perturbations where GEARS L2 > no-change L2": 0.5,
+ "mean ||pred delta||, mean ||obs delta||, ratio": [
+  3.784098092462432,
+  4.6097676841787,
+  0.8208869408863988
+ ],
+ "mean cosine(pred delta, obs delta) (uncentred)": 0.406630701482694,
+ "optimal global scale alpha* (pred*alpha*)": 0.5575156785053521,
+ "mean L2 with pred*alpha*": 4.192777271157461,
+ "no-change beats GEARS iff ||p||^2 > 2<p,o>: fraction of perturbations satisfying it": 0.5,
+ "||mean pred delta||, ||mean obs delta||, ||train mean delta||": [
+  3.3888191744818785,
+  2.141547006352193,
+  2.124505301628991
+ ],
+ "cosine(mean pred, mean obs), cosine(mean pred, train mean)": [
+  0.9208705395931808,
+  0.8614595531293044
+ ],
+ "mean L2 if the mean predicted delta is replaced by the observed mean": 4.270248977980763,
+ "mean L2 of the centred parts only: (pred - mean pred) vs (obs - mean obs)": 4.270248977980763,
+ "mean L2 of the centred observed deltas alone (no-change after removing the mean response)": 4.255391054378078
+}

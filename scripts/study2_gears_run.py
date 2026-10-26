@@ -1,6 +1,6 @@
 """STUDY 2 / Phase 1 (calibration). Run in the SEPARATE env:  mamba run -n hic-perturb-gears python -u scripts/study2_gears_run.py --label gears_seed1
 Trains GEARS (cell-gears 0.1.2) on GEARS-processed K562 with the STANDARD GO perturbation graph and the default hyper-parameters of the Ahlmann-Eltze et al. benchmark script
-(run_gears.py: epochs=20, hidden_size=64, batch 32 / test batch 128, custom split = our GEARS split JSON, np.random.seed(seed)). Writes predictions for the TEST perturbations
+(run_gears.py: epochs=20 -> here max 12 + early stopping with checkpoints, hidden_size=64, batch 32 / test batch 128, custom split = our GEARS split JSON, np.random.seed(seed)). Writes predictions for the TEST perturbations
 (no Hi-C of any kind; no RPE1 data).  Instrumented: wall time per phase, RSS sampled every 20 s, optional time-limited CPU-vs-MPS benchmark through GEARS' own training loop."""
 import argparse
 import itertools
@@ -18,13 +18,16 @@ import torch
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--label", default="gears_seed1"); ap.add_argument("--seed", type=int, default=1)
-ap.add_argument("--epochs", type=int, default=20); ap.add_argument("--hidden", type=int, default=64)
+ap.add_argument("--epochs", type=int, default=12, help="MAX epochs (early stopping may end earlier)"); ap.add_argument("--hidden", type=int, default=64)
+ap.add_argument("--patience", type=int, default=3); ap.add_argument("--monitor", default="mse", choices=["mse", "mse_de"], help="validation metric for early stopping (GEARS keeps its best model by top-20-DE MSE regardless)")
+ap.add_argument("--eval-train", action="store_true", help="also evaluate the full training set every epoch (GEARS default; only for printing)")
+ap.add_argument("--ckpt-root", default="data/study2_ckpt"); ap.add_argument("--no-resume", action="store_true")
 ap.add_argument("--batch", type=int, default=32); ap.add_argument("--test-batch", type=int, default=128)
-ap.add_argument("--device", default="auto", help="cpu | mps | auto (benchmark both, use the faster that works)")
+ap.add_argument("--device", default="mps", help="cpu | mps | auto (benchmark both, use the faster that works)")
 ap.add_argument("--bench-steps", type=int, default=40); ap.add_argument("--bench-only", action="store_true")
 ap.add_argument("--out", default=None)
 a = ap.parse_args()
-out = Path(a.out or f"results/study2/gears_k562_{a.label}"); out.mkdir(parents=True, exist_ok=True)
+out = Path(a.out or f"results/study2/gears_k562_{a.label}_s{a.seed}"); out.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 T0 = time.time(); proc = psutil.Process(); peak = [0.0]; log_f = open(out / "run.log", "a")
 
@@ -98,9 +101,15 @@ timing["device_used"] = device
 json.dump(timing, open(out / "timing.json", "w"), indent=1)
 if a.bench_only:
     sys.exit(0)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from study2_gears_train import train_gears                                            # noqa: E402
 g = make(device)
-t = time.time(); g.train(epochs=a.epochs); timing["t_train_s"] = time.time() - t
-log("training finished", f"{timing['t_train_s']:.0f}s")
+ckpt = Path(a.ckpt_root) / f"{a.label}_s{a.seed}"
+t = time.time()
+summary = train_gears(g, epochs=a.epochs, patience=a.patience, monitor=a.monitor, ckpt_dir=ckpt, resume=not a.no_resume, eval_train=a.eval_train, log=log,
+                      meta={"label": a.label, "seed": a.seed, "hidden": a.hidden, "batch": a.batch, "device": device, "max_epochs": a.epochs})
+timing["t_train_s_this_process"] = time.time() - t; timing["training_summary"] = summary
+log("training finished", f"{timing['t_train_s_this_process']:.0f}s this process;", {k: v for k, v in summary.items() if k != "history"})
 test_conds = [c for c in set2c["test"] if c != "ctrl"]
 genes = [c.split("+") for c in test_conds]; genes = [[x for x in gl if x != "ctrl"] for gl in genes]
 ok_idx = [i for i, gl in enumerate(genes) if all(x in g.pert_list for x in gl)]

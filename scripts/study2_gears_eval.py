@@ -14,6 +14,7 @@ import pandas as pd
 from src.baselines import EMBEDDINGS
 from src.data import PerturbationDataset, split_from_conditions
 from src.evaluate import fit_predict_linear, gene_masks, per_pert_metrics
+from src.study2_metrics import centred_pearson
 
 PAPER = {"L2": 3.991, "Pearson": 0.387}          # Ahlmann-Eltze et al. 2025, GEARS, Replogle K562 (mean over their 2 splits), top-1000 expressed genes, target included
 
@@ -36,6 +37,9 @@ def score(ds, split, gears_delta: dict, n_top_expr=1000, n_top_de=20) -> pd.Data
                 if mname.startswith("linear") and not sname.startswith("A"):
                     continue                                               # the PCA model cannot predict targets outside the read-out set
                 d = per_pert_metrics(P[sel], ds.delta[te][sel], masks); d["pert_i"] = te[sel][d["pert_i"].values]
+                d["pearson_centred"] = np.nan                                  # third metric: Pearson after subtracting the mean perturbation effect across the evaluated test perturbations
+                for sub, m_ in masks.items():
+                    d.loc[d["subset"] == sub, "pearson_centred"] = centred_pearson(P[sel], ds.delta[te][sel], m_)
                 out.append(d.assign(model=mname, set=sname, target=tmode))
     return pd.concat(out)
 
@@ -50,11 +54,11 @@ def main():
     pos = {p: i for i, p in enumerate(ds.perts)}
     gd = {pos[c.replace("+ctrl", "")]: z["pred_expression"][k].astype(np.float64) - ds.ctrl_mean for k, c in enumerate(z["conditions"])}
     M = score(ds, split, gd); M.to_csv(d / "gears_eval_per_perturbation.csv", index=False)
-    S = M.groupby(["set", "target", "model", "subset"]).agg(L2=("l2", "mean"), Pearson=("pearson", "mean"), n=("pert_i", "nunique")).reset_index()
+    S = M.groupby(["set", "target", "model", "subset"]).agg(L2=("l2", "mean"), Pearson=("pearson", "mean"), Pearson_centred=("pearson_centred", "mean"), n=("pert_i", "nunique")).reset_index()
     S.to_csv(d / "gears_eval_summary.csv", index=False)
     print(S[S["subset"] == "top1000_expr"].round(4).to_string(index=False))
     like = S[(S["set"].str.startswith("A")) & (S.target == "included") & (S["subset"] == "top1000_expr") & (S.model == "GEARS")].iloc[0]
-    json.dump({"label": a.label, "gears_like_for_like (set A, target included, top-1000)": {"L2": float(like.L2), "Pearson": float(like.Pearson), "n": int(like.n)}, "paper_gears": PAPER}, open(d / "gears_eval_headline.json", "w"), indent=1)
+    json.dump({"label": a.label, "gears_like_for_like (set A, target included, top-1000)": {"L2": float(like.L2), "Pearson": float(like.Pearson), "Pearson_centred": float(like.Pearson_centred), "n": int(like.n)}, "paper_gears": PAPER}, open(d / "gears_eval_headline.json", "w"), indent=1)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
  "gears_like_for_like (set A, target included, top-1000)": {
   "L2": 4.6319338518544075,
   "Pearson": 0.38685972469026936,
+  "Pearson_centred": 0.1925693813285611,
   "n": 104
  },
  "paper_gears": {
