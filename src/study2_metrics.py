@@ -22,3 +22,12 @@ def centred_pearson(pred: np.ndarray, obs: np.ndarray, mask: np.ndarray) -> np.n
         if den > 1e-10 and np.sqrt((pc[i, mask[i]] ** 2).sum()) > 1e-10:
             out[i] = (a * b).sum() / den
     return out
+
+
+def amplitude_ratios(pred: np.ndarray, obs: np.ndarray, mask: np.ndarray) -> dict:
+    """Amplitude calibration of a prediction over the evaluated perturbations (genes outside each perturbation's mask are zeroed).
+    mean_delta_ratio = ||mean over perts of predicted delta|| / ||mean over perts of observed delta||  (the shared-response amplitude);
+    pert_norm_ratio  = mean over perts of ||predicted delta|| / mean over perts of ||observed delta||.   > 1 = overshoot, < 1 = undershoot."""
+    P, O = np.where(mask, np.asarray(pred, float), 0.0), np.where(mask, np.asarray(obs, float), 0.0)
+    return {"mean_delta_ratio": float(np.linalg.norm(P.mean(0)) / np.linalg.norm(O.mean(0))),
+            "pert_norm_ratio": float(np.linalg.norm(P, axis=1).mean() / np.linalg.norm(O, axis=1).mean())}

@@ -26,3 +26,13 @@ def test_centred_pearson_removes_shared_response():
     # masks are honoured; n < 2 -> NaN
     m2 = mask.copy(); m2[:, 100:] = False
     assert np.allclose(centred_pearson(pred, obs, m2), 1.0) and np.isnan(centred_pearson(pred[:1], obs[:1], mask[:1])).all()
+
+
+def test_amplitude_ratios():
+    from .study2_metrics import amplitude_ratios
+    rng = np.random.RandomState(1)
+    obs = rng.randn(30, 50) + 2.0
+    mask = np.ones_like(obs, bool)
+    r = amplitude_ratios(1.5 * obs, obs, mask)
+    assert abs(r["mean_delta_ratio"] - 1.5) < 1e-9 and abs(r["pert_norm_ratio"] - 1.5) < 1e-9
+    assert abs(amplitude_ratios(0.5 * obs, obs, mask)["mean_delta_ratio"] - 0.5) < 1e-9
