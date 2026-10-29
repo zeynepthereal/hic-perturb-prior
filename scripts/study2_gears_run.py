@@ -19,7 +19,7 @@ import torch
 ap = argparse.ArgumentParser()
 ap.add_argument("--label", default="gears_seed1"); ap.add_argument("--seed", type=int, default=1)
 ap.add_argument("--epochs", type=int, default=12, help="MAX epochs (early stopping may end earlier)"); ap.add_argument("--hidden", type=int, default=64)
-ap.add_argument("--patience", type=int, default=3); ap.add_argument("--monitor", default="mse", choices=["mse", "mse_de"], help="validation metric for early stopping (GEARS keeps its best model by top-20-DE MSE regardless)")
+ap.add_argument("--patience", type=int, default=3); ap.add_argument("--monitor", default="mse_de", choices=["mse", "mse_de"], help="validation metric for early stopping (GEARS keeps its best model by top-20-DE MSE regardless)")
 ap.add_argument("--eval-train", action="store_true", help="also evaluate the full training set every epoch (GEARS default; only for printing)")
 ap.add_argument("--ckpt-root", default="data/study2_ckpt"); ap.add_argument("--no-resume", action="store_true")
 ap.add_argument("--batch", type=int, default=32); ap.add_argument("--test-batch", type=int, default=128)

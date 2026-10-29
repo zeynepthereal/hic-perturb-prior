@@ -69,3 +69,10 @@ None of these changes an analytical choice; they are recorded for completeness.
 ## D8 — OpenTimestamps upgrade attempt (2026-10-14T21:07Z)
 
 `ots upgrade` on both proofs (about 28 minutes after stamping) did **not** complete: the calendars `alice.btc.calendar.opentimestamps.org` (tx `c781f9850e206433f0e42ba36c5c73fb67b1d868756b3225a713b227dcf91380`) and `bob.btc.calendar.opentimestamps.org` (tx `88c3c62fc5510473b91926b9fc5badff136f8cd505416167b12769fafaf6e2f6`) report the digests are included in Bitcoin transactions and are waiting for 6 confirmations; `btc.calendar.catallaxy.com` is pending; `finney.calendar.eternitywall.com` timed out. The `.ots` files are unchanged (identical SHA-256 before and after), so nothing was committed. To be retried.
+
+## D9 — Study 2 (exploratory): GEARS training loop differs from stock `GEARS.train` (2026-10-29)
+Study 2 trains GEARS with `scripts/study2_gears_train.py`, a checkpointed early-stopping replica of `GEARS.train` (cell-gears 0.1.2). Self-test: the replica is bit-identical to `GEARS.train` on real batches (CPU, fixed seeds), and a crash-and-resume run is bit-identical to an uninterrupted one. Intended differences, applied **uniformly to all 9 runs** (3 splits × 3 seeds):
+1. Early stopping: max 12 epochs, patience 3 on validation top-20-DE MSE (`--monitor mse_de`, the same metric GEARS uses to pick its best model, so "best epoch" is unambiguous); stock GEARS runs a fixed number of epochs.
+2. GEARS' per-epoch full-train-set evaluation (printing only) is skipped. It consumes DataLoader RNG, so after epoch 1 the data order differs from the stock GEARS stream: **runs are not bit-identical to stock GEARS beyond epoch 1.** Training dynamics, optimiser, scheduler, clipping and model selection are otherwise unchanged.
+3. GEARS' final test-set analysis is skipped; predictions come from `GEARS.predict`.
+Not a deviation from any pre-registered Study 1 procedure; recorded for transparency.

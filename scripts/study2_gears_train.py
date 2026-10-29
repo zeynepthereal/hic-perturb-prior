@@ -45,7 +45,7 @@ def _cpu_state(model):
     return {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 
 
-def train_gears(g, *, epochs=12, patience=3, monitor="mse", lr=1e-3, weight_decay=5e-4, ckpt_dir=None, meta=None, eval_train=False, log=print, resume=True, step_log=50):
+def train_gears(g, *, epochs=12, patience=3, monitor="mse_de", lr=1e-3, weight_decay=5e-4, ckpt_dir=None, meta=None, eval_train=False, log=print, resume=True, step_log=50):
     """Train GEARS object `g` (after model_initialize). Sets g.best_model. Returns a summary dict."""
     import gears.gears as gg                                                          # evaluate, compute_metrics, loss_fct, uncertainty_loss_fct
     assert monitor in ("mse", "mse_de")
