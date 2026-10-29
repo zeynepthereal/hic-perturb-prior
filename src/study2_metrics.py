@@ -30,4 +30,12 @@ def amplitude_ratios(pred: np.ndarray, obs: np.ndarray, mask: np.ndarray) -> dic
     pert_norm_ratio  = mean over perts of ||predicted delta|| / mean over perts of ||observed delta||.   > 1 = overshoot, < 1 = undershoot."""
     P, O = np.where(mask, np.asarray(pred, float), 0.0), np.where(mask, np.asarray(obs, float), 0.0)
     return {"mean_delta_ratio": float(np.linalg.norm(P.mean(0)) / np.linalg.norm(O.mean(0))),
-            "pert_norm_ratio": float(np.linalg.norm(P, axis=1).mean() / np.linalg.norm(O, axis=1).mean())}
+            "pert_norm_ratio": float(np.linalg.norm(P, axis=1).mean() / np.linalg.norm(O, axis=1).mean()),
+            "collapse_pred": collapse_index(P, mask), "collapse_obs": collapse_index(O, mask)}
+
+
+def collapse_index(X: np.ndarray, mask: np.ndarray) -> float:
+    """collapse(X) = ||mean_p X_p|| / mean_p ||X_p|| over the evaluated perturbations (masked genes only). 1 = all perturbations point the same way (fully collapsed onto one shared
+    direction); ~1/sqrt(n) = directions unrelated to each other. Identity: mean_delta_ratio = collapse(pred)/collapse(obs) * pert_norm_ratio."""
+    X = np.where(mask, np.asarray(X, float), 0.0)
+    return float(np.linalg.norm(X.mean(0)) / np.linalg.norm(X, axis=1).mean())

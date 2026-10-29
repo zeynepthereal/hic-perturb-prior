@@ -36,3 +36,16 @@ def test_amplitude_ratios():
     r = amplitude_ratios(1.5 * obs, obs, mask)
     assert abs(r["mean_delta_ratio"] - 1.5) < 1e-9 and abs(r["pert_norm_ratio"] - 1.5) < 1e-9
     assert abs(amplitude_ratios(0.5 * obs, obs, mask)["mean_delta_ratio"] - 0.5) < 1e-9
+
+
+def test_collapse_index():
+    from .study2_metrics import amplitude_ratios, collapse_index
+    rng = np.random.RandomState(2)
+    mask = np.ones((60, 80), bool)
+    v = rng.randn(80)
+    assert abs(collapse_index(np.tile(v, (60, 1)), mask) - 1.0) < 1e-9          # all along one direction
+    assert collapse_index(rng.randn(60, 80), mask) < 0.2                          # unrelated directions: ~1/sqrt(n)
+    obs = rng.randn(60, 80); pred = np.tile(v, (60, 1)) * 0.5 + 0.2 * rng.randn(60, 80)
+    r = amplitude_ratios(pred, obs, mask)
+    assert r["collapse_pred"] > 5 * r["collapse_obs"]
+    assert abs(r["mean_delta_ratio"] - r["collapse_pred"] / r["collapse_obs"] * r["pert_norm_ratio"]) < 1e-9
