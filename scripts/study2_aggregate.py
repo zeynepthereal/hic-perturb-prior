@@ -48,7 +48,7 @@ for c in metrics:
     out.append(f"| {c} | {G[c].quantile(.75) - G[c].quantile(.25):.4f} | {ps.median().max() - ps.median().min():.4f} | {(ps.max() - ps.min()).mean():.4f} |")
 if "mean_delta_ratio" in G:
     out.append(f"\nCollapse index = ||mean_p X_p|| / mean_p ||X_p|| (1 = all perturbations along one shared direction); GEARS collapse(pred) > collapse(obs) in {int((G.collapse_pred > G.collapse_obs).sum())} of {len(G)} runs.")
-    out.append(f"\nGEARS mean-delta amplitude ratio of the shared response (mean-delta amplitude ratio > 1) in {int((G.mean_delta_ratio > 1).sum())} of {len(G)} runs; per-perturbation norm ratio < 1 in {int((G.pert_norm_ratio < 1).sum())} of {len(G)}.")
+    out.append(f"\nGEARS mean-delta amplitude ratio > 1 in {int((G.mean_delta_ratio > 1).sum())} of {len(G)} runs; per-perturbation norm ratio < 1 in {int((G.pert_norm_ratio < 1).sum())} of {len(G)}.")
 Path("results/study2").mkdir(exist_ok=True)
 open("results/study2/variance_summary.md", "w").write("\n".join(out) + "\n"); S.to_csv("results/study2/variance_all_runs.csv", index=False)
 print("\n".join(out))
