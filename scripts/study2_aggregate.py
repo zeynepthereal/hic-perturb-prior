@@ -36,15 +36,21 @@ def fmt(x):
 
 
 out = [f"# Study 2: variance summary (finished runs: {S[['split', 'seed']].drop_duplicates().shape[0]} of {len(a.splits) * len(a.seeds)}; missing: {missing or 'none'})\n",
-       "Top-1000 control-expressed genes; cells are `median [min, max]` over runs (GEARS: up to 9 runs; deterministic baselines: one value per split, up to 3). Pearson_centred = Pearson after subtracting the mean perturbation effect across the evaluated test perturbations (NaN for constant predictors). Amplitude ratios: >1 overshoot, <1 undershoot.\n"]
+       "Top-1000 control-expressed genes; cells are `median [min, max]` over runs (GEARS: up to 9 runs; deterministic baselines: one value per split, up to 3). Pearson_centred = Pearson after subtracting the mean perturbation effect across the evaluated test perturbations (NaN for constant predictors). Amplitude ratios: mean-delta = ||mean predicted delta|| / ||mean observed delta||; per-pert norm = mean ||predicted delta|| / mean ||observed delta||; collapse ratio = collapse(pred)/collapse(obs).\n"]
 for (sset, tgt), g in S.groupby(["set", "target"]):
     out.append(f"\n## {sset} - target {tgt}\n\n| model | n runs | L2 | Pearson | Pearson (centred) | amp. ratio, mean delta | amp. ratio, per-pert norm | collapse ratio pred/obs |\n|---|---|---|---|---|---|---|---|")
     for m, gm in g.groupby("model"):
-        gm = gm.drop_duplicates(["split", "seed"]) if not m.startswith("GEARS") else gm            # deterministic models: identical across seeds -> one row per split
+        gm = gm.drop_duplicates(["split"]) if not m.startswith("GEARS") else gm            # deterministic models: identical across seeds -> one row per split
         out.append(f"| {m} | {len(gm)} | " + " | ".join(fmt(gm[c]) for c in metrics) + " |")
 out.append("\n## collapse(obs) per split (a property of the data split, not of the model; set A / B, target included)\n\n| set | split | collapse(obs) |\n|---|---|---|")
 for (sset, sp), g in S[(S.model == "GEARS") & (S.target == "included")].groupby(["set", "split"]):
     out.append(f"| {sset} | {sp} | {g.collapse_obs.iloc[0]:.4f} |")
+out.append("\n## Per split (set A, target included): median [min, max] over the 3 training seeds for GEARS; deterministic baselines one value\n\n| split | model | L2 | Pearson | Pearson (centred) | amp. ratio, per-pert norm |\n|---|---|---|---|---|---|")
+for sp in a.splits:
+    for m in ["GEARS", "linear[PCA] (K=10, lam=0.1)", "mean", "no_change", "GEARS [shuffled across perts]"]:
+        g = S[(S.split == sp) & (S.model == m) & S.set.str.startswith("A") & (S.target == "included")]
+        if len(g):
+            out.append(f"| {sp} | {m} | " + " | ".join(fmt(g[c]) for c in ["L2", "Pearson", "Pearson_centred", "pert_norm_ratio"]) + " |")
 G = S[(S.model == "GEARS") & S.set.str.startswith("A") & (S.target == "included")]
 out.append("\n## GEARS spread decomposition (set A, target included)\n\n| metric | IQR over runs | between-split range (of per-split medians) | mean within-split range (between seeds) |\n|---|---|---|---|")
 for c in metrics:

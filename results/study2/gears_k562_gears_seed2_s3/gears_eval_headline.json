@@ -1,0 +1,13 @@
+{
+ "label": "gears_seed2_s3",
+ "gears_like_for_like (set A, target included, top-1000)": {
+  "L2": 4.040753820541931,
+  "Pearson": 0.40471832972553584,
+  "Pearson_centred": 0.30272244385112873,
+  "n": 105
+ },
+ "paper_gears": {
+  "L2": 3.991,
+  "Pearson": 0.387
+ }
+}
