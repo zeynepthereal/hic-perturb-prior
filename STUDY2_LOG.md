@@ -89,7 +89,7 @@ Graph-level zero-row gate on RPE1 at 500 kb (node level; Study 1 recipe; the per
 - **Aggregator:** collapse(obs) is a property of the data split, so it is reported per split in its own table, and any cross-run comparison uses the ratio collapse(pred)/collapse(obs), not the raw collapse(pred).
 
 ## P1.7 RESULT: GEARS, 3 splits × 3 training seeds (9 runs) vs deterministic baselines (finished 2026-10-30 17:40 PDT)
-Full tables: `results/study2/variance_summary.md`, per-run rows `results/study2/variance_all_runs.csv`. Early stopping on val top-20-DE MSE (patience 3, max 12): all 9 runs stopped early, after 5–10 epochs (best top-20-DE epoch 2–7); 16.5 h of active training in total (estimate was ≈19 h). No prediction was rescaled. Set A (104/… test perturbations GEARS and PCA can both predict, per split), target included, top-1000 genes; `median [min, max]` over 9 GEARS runs, over 3 splits for the baselines:
+Full tables: `results/study2/variance_summary.md`, per-run rows `results/study2/variance_all_runs.csv`. Early stopping on val top-20-DE MSE (patience 3, max 12): all 9 runs stopped early, after 5–10 epochs (best top-20-DE epoch 2–7); 16.5 h of active training in total (estimate was ≈19 h). No prediction was rescaled. Set A (the test perturbations GEARS and PCA can both predict, per split; 104 on split 1), target included, top-1000 genes; `median [min, max]` over 9 GEARS runs, over 3 splits for the baselines:
 
 | model | L2 | Pearson | Pearson (centred) | amp. ratio, per-pert norm | collapse ratio pred/obs |
 |---|---|---|---|---|---|
