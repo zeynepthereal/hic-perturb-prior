@@ -25,8 +25,9 @@ if not rows:
     sys.exit("no finished runs")
 S = pd.concat(rows); A = pd.concat(amps)
 S = S.merge(A, on=["set", "target", "model", "subset", "split", "seed"], how="left")
-S = S[S["subset"] == "top1000_expr"]
-metrics = ["L2", "Pearson", "Pearson_centred", "mean_delta_ratio", "pert_norm_ratio", "collapse_pred", "collapse_obs"]
+S = S[S["subset"] == "top1000_expr"].copy()
+S["collapse_ratio"] = S["collapse_pred"] / S["collapse_obs"]          # collapse(obs) is a property of the split, so cross-run comparisons use this ratio
+metrics = ["L2", "Pearson", "Pearson_centred", "mean_delta_ratio", "pert_norm_ratio", "collapse_ratio"]
 
 
 def fmt(x):
@@ -37,17 +38,20 @@ def fmt(x):
 out = [f"# Study 2: variance summary (finished runs: {S[['split', 'seed']].drop_duplicates().shape[0]} of {len(a.splits) * len(a.seeds)}; missing: {missing or 'none'})\n",
        "Top-1000 control-expressed genes; cells are `median [min, max]` over runs (GEARS: up to 9 runs; deterministic baselines: one value per split, up to 3). Pearson_centred = Pearson after subtracting the mean perturbation effect across the evaluated test perturbations (NaN for constant predictors). Amplitude ratios: >1 overshoot, <1 undershoot.\n"]
 for (sset, tgt), g in S.groupby(["set", "target"]):
-    out.append(f"\n## {sset} - target {tgt}\n\n| model | n runs | L2 | Pearson | Pearson (centred) | amp. ratio, mean delta | amp. ratio, per-pert norm | collapse(pred) | collapse(obs) |\n|---|---|---|---|---|---|---|---|---|")
+    out.append(f"\n## {sset} - target {tgt}\n\n| model | n runs | L2 | Pearson | Pearson (centred) | amp. ratio, mean delta | amp. ratio, per-pert norm | collapse ratio pred/obs |\n|---|---|---|---|---|---|---|---|")
     for m, gm in g.groupby("model"):
         gm = gm.drop_duplicates(["split", "seed"]) if not m.startswith("GEARS") else gm            # deterministic models: identical across seeds -> one row per split
         out.append(f"| {m} | {len(gm)} | " + " | ".join(fmt(gm[c]) for c in metrics) + " |")
+out.append("\n## collapse(obs) per split (a property of the data split, not of the model; set A / B, target included)\n\n| set | split | collapse(obs) |\n|---|---|---|")
+for (sset, sp), g in S[(S.model == "GEARS") & (S.target == "included")].groupby(["set", "split"]):
+    out.append(f"| {sset} | {sp} | {g.collapse_obs.iloc[0]:.4f} |")
 G = S[(S.model == "GEARS") & S.set.str.startswith("A") & (S.target == "included")]
 out.append("\n## GEARS spread decomposition (set A, target included)\n\n| metric | IQR over runs | between-split range (of per-split medians) | mean within-split range (between seeds) |\n|---|---|---|---|")
 for c in metrics:
     ps = G.groupby("split")[c]
     out.append(f"| {c} | {G[c].quantile(.75) - G[c].quantile(.25):.4f} | {ps.median().max() - ps.median().min():.4f} | {(ps.max() - ps.min()).mean():.4f} |")
 if "mean_delta_ratio" in G:
-    out.append(f"\nCollapse index = ||mean_p X_p|| / mean_p ||X_p|| (1 = all perturbations along one shared direction); GEARS collapse(pred) > collapse(obs) in {int((G.collapse_pred > G.collapse_obs).sum())} of {len(G)} runs.")
+    out.append(f"\nCollapse index = ||mean_p X_p|| / mean_p ||X_p|| (1 = all perturbations along one shared direction); GEARS collapse ratio pred/obs > 1 in {int((G.collapse_ratio > 1).sum())} of {len(G)} runs.")
     out.append(f"\nGEARS mean-delta amplitude ratio > 1 in {int((G.mean_delta_ratio > 1).sum())} of {len(G)} runs; per-perturbation norm ratio < 1 in {int((G.pert_norm_ratio < 1).sum())} of {len(G)}.")
 Path("results/study2").mkdir(exist_ok=True)
 open("results/study2/variance_summary.md", "w").write("\n".join(out) + "\n"); S.to_csv("results/study2/variance_all_runs.csv", index=False)
